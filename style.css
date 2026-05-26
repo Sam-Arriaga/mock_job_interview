@@ -1,0 +1,321 @@
+/* RESET */
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+/* BODY */
+body{
+    background:#f3f4f6;
+    font-family:Arial, Helvetica, sans-serif;
+    color:#111827;
+}
+
+/* MAIN APP */
+.app-container{
+    width:100%;
+    min-height:100vh;
+}
+
+/* HEADER */
+.app-header{
+    background:#0f172a;
+    color:white;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    padding:15px 30px;
+}
+
+/* BRAND */
+.brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+
+    font-size:22px;
+    font-weight:bold;
+}
+
+/* SHIELD */
+.logo-shield{
+    width:40px;
+    height:40px;
+
+    border:2px solid #d4af37;
+    border-radius:10px;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    color:#d4af37;
+    font-weight:bold;
+    font-size:20px;
+}
+
+/* HEADER CONTROLS */
+.header-controls{
+    display:flex;
+    align-items:center;
+    gap:15px;
+}
+
+/* PROGRESS */
+.progress-label{
+    font-size:15px;
+}
+
+/* LISTENING SUPPORT */
+.listening-support{
+    padding:10px 15px;
+
+    border-radius:10px;
+    border:none;
+
+    background:#1e293b;
+    color:white;
+
+    cursor:pointer;
+}
+
+/* SETTINGS BUTTON */
+.settings-btn{
+    background:#1e293b;
+    color:white;
+
+    border:none;
+
+    width:42px;
+    height:42px;
+
+    border-radius:10px;
+
+    cursor:pointer;
+    font-size:20px;
+}
+
+/* MAIN LAYOUT */
+.main-layout{
+    display:flex;
+    gap:30px;
+
+    padding:30px;
+}
+
+/* VIDEO SECTION */
+.video-section{
+    flex:1.2;
+}
+
+/* VIDEO WRAPPER */
+.video-wrapper{
+    background:white;
+
+    padding:20px;
+
+    border-radius:20px;
+
+    box-shadow:0 5px 15px rgba(0,0,0,0.08);
+}
+
+/* VIDEO */
+video{
+    width:100%;
+
+    border-radius:15px;
+}
+
+/* CAPTION BOX */
+.caption-box{
+    margin-top:15px;
+
+    background:white;
+
+    padding:15px;
+
+    border-radius:15px;
+
+    box-shadow:0 5px 15px rgba(0,0,0,0.05);
+}
+
+/* INTERVIEW PANEL */
+.interview-panel{
+    flex:0.8;
+
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+}
+
+/* CARDS */
+.question-card,
+.feedback-card{
+    background:white;
+
+    padding:25px;
+
+    border-radius:20px;
+
+    box-shadow:0 5px 15px rgba(0,0,0,0.08);
+}
+
+/* TITLES */
+.question-card h2,
+.feedback-card h2{
+    color:#b8860b;
+
+    margin-bottom:15px;
+
+    font-size:18px;
+}
+
+/* QUESTION TEXT */
+.question-text{
+    font-size:28px;
+    font-weight:bold;
+
+    line-height:1.4;
+
+    margin-bottom:20px;
+}
+
+/* TEXTAREA */
+textarea{
+    width:100%;
+    min-height:140px;
+
+    padding:15px;
+
+    border-radius:15px;
+    border:2px solid #d1d5db;
+
+    resize:none;
+
+    font-size:16px;
+}
+
+/* BUTTON AREA */
+.action-buttons{
+    display:flex;
+    gap:15px;
+
+    margin-top:20px;
+}
+
+/* GENERAL BUTTONS */
+button{
+    border:none;
+    cursor:pointer;
+
+    transition:0.3s;
+}
+
+/* PRIMARY BUTTON */
+.primary-btn{
+    flex:1;
+
+    background:#0f172a;
+    color:white;
+
+    padding:18px;
+
+    border-radius:15px;
+
+    font-size:18px;
+}
+
+/* SECONDARY BUTTON */
+.secondary-btn{
+    flex:1;
+
+    background:white;
+    color:#111827;
+
+    border:2px solid #d1d5db;
+
+    padding:18px;
+
+    border-radius:15px;
+
+    font-size:18px;
+}
+
+/* GOLD BUTTON */
+.gold-btn{
+    flex:1;
+
+    background:#d4af37;
+    color:white;
+
+    padding:18px;
+
+    border-radius:15px;
+
+    font-size:18px;
+}
+
+/* BUTTON HOVER */
+.primary-btn:hover{
+    background:#1e293b;
+}
+
+.secondary-btn:hover{
+    background:#f3f4f6;
+}
+
+.gold-btn:hover{
+    background:#b8860b;
+}
+
+/* FEEDBACK */
+.feedback-card p{
+    margin-bottom:12px;
+
+    line-height:1.5;
+}
+
+/* SUGGESTION */
+.suggestion{
+    font-style:italic;
+    color:#1e3a8a;
+}
+
+/* NEXT BUTTON */
+.next-btn{
+    background:#0f172a;
+    color:white;
+
+    padding:18px;
+
+    border-radius:15px;
+
+    font-size:22px;
+}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+
+    .main-layout{
+        flex-direction:column;
+    }
+
+    .header-controls{
+        gap:10px;
+    }
+
+    .progress-label{
+        display:none;
+    }
+
+    .question-text{
+        font-size:22px;
+    }
+
+    .action-buttons{
+        flex-direction:column;
+    }
+}

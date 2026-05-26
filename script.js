@@ -1,7 +1,17 @@
-function sendAnswer() {
-  const answer = document.getElementById("answer").value;
+const speakBtn = document.getElementById("speakBtn");
+const finishBtn = document.getElementById("finishBtn");
+const responseText = document.getElementById("responseText");
 
-  console.log("Student answer:", answer);
+speakBtn.addEventListener("click", () => {
 
-  alert("Answer received!");
-}
+    responseText.innerHTML =
+    "Listening to your answer...";
+
+});
+
+finishBtn.addEventListener("click", () => {
+
+    responseText.innerHTML =
+    "Interview completed successfully.";
+
+});

@@ -1,27 +1,91 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Emily Interview</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SilverClassroom | Emily Interview Coach</title>
+
+  <!-- CSS will be connected later -->
+  <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
 
-  <h1>Emily AI Interview</h1>
+  <div class="app-container">
 
-  <video width="600" controls>
-    <source src="videos/welcome.mp4" type="video/mp4">
-  </video>
+    <!-- HEADER -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="logo-shield">S</div>
+        <span>SILVERCLASSROOM</span>
+      </div>
 
-  <br><br>
+      <div class="header-controls">
+        <span class="progress-label">Progress: 1 / 7</span>
 
-  <textarea id="answer" placeholder="Type your answer here..."></textarea>
+        <select class="listening-support" aria-label="Listening Support">
+          <option>No Captions</option>
+          <option>Key Ideas Only</option>
+          <option>Full Captions</option>
+        </select>
 
-  <br><br>
+        <button class="settings-btn" aria-label="Settings">☰</button>
+      </div>
+    </header>
 
-  <button onclick="sendAnswer()">Send</button>
+    <!-- MAIN CONTENT -->
+    <main class="main-layout">
 
+      <!-- LEFT: VIDEO AREA -->
+      <section class="video-section">
+        <div class="video-wrapper">
+          <video controls poster="">
+            <source src="" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+        </div>
+
+        <div class="caption-box">
+          <p id="captionText">Listening support text will appear here.</p>
+        </div>
+      </section>
+
+      <!-- RIGHT: INTERVIEW PANEL -->
+      <section class="interview-panel">
+
+        <div class="question-card">
+          <h2>QUESTION</h2>
+          <p class="question-text">
+            What is the position you are interested in?
+          </p>
+
+          <textarea 
+            placeholder="Type your answer..."
+            aria-label="Type your answer"></textarea>
+
+          <div class="action-buttons">
+            <button class="primary-btn">🎙 Speak Now</button>
+            <button class="secondary-btn">↻ Repeat</button>
+            <button class="gold-btn">✓ Submit</button>
+          </div>
+        </div>
+
+        <div class="feedback-card">
+          <h2>AI FEEDBACK</h2>
+          <p><strong>Good answer!</strong></p>
+          <p>Try this instead:</p>
+          <p class="suggestion">“I’m interested in...”</p>
+        </div>
+
+        <button class="next-btn">Next</button>
+
+      </section>
+
+    </main>
+
+  </div>
+
+  <!-- JavaScript will be connected later -->
   <script src="script.js"></script>
 
 </body>
