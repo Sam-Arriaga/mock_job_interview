@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SilverClassroom | Emily Interview Coach</title>
 
-  <!-- CSS will be connected later -->
   <link rel="stylesheet" href="style.css" />
 </head>
 
@@ -21,12 +20,12 @@
       </div>
 
       <div class="header-controls">
-        <span class="progress-label">Progress: 1 / 7</span>
+        <span id="progressLabel" class="progress-label">Progress: 1 / 1</span>
 
-        <select class="listening-support" aria-label="Listening Support">
-          <option>No Captions</option>
-          <option>Key Ideas Only</option>
-          <option>Full Captions</option>
+        <select id="captionMode" class="listening-support" aria-label="Listening Support">
+          <option value="none">No Captions</option>
+          <option value="key">Key Ideas Only</option>
+          <option value="full">Full Captions</option>
         </select>
 
         <button class="settings-btn" aria-label="Settings">☰</button>
@@ -36,48 +35,61 @@
     <!-- MAIN CONTENT -->
     <main class="main-layout">
 
-      <!-- LEFT: VIDEO AREA -->
-      <section class="video-section">
-        <div class="video-wrapper">
-          <video controls poster="">
-            <source src="" type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
+      <!-- LEFT PANEL: VIDEO -->
+      <section class="video-panel">
+
+        <div class="video-container">
+          <img
+            id="idleImage"
+            src=""
+            alt="Emily Idle"
+            class="idle-image"
+          />
+
+          <video
+            id="emilyVideo"
+            class="emily-video"
+            autoplay
+            muted
+            playsinline
+          ></video>
         </div>
+
+        <div id="subtitleBox" class="subtitle-box">
+          Emily subtitles will appear here...
+        </div>
+
+        <div id="systemBanner" class="system-banner hidden"></div>
 
         <div class="caption-box">
           <p id="captionText">Listening support text will appear here.</p>
         </div>
+
       </section>
 
-      <!-- RIGHT: INTERVIEW PANEL -->
+      <!-- RIGHT PANEL: INTERVIEW -->
       <section class="interview-panel">
 
-        <div class="question-card">
-          <h2>QUESTION</h2>
-          <p class="question-text">
-            What is the position you are interested in?
-          </p>
+        <h2 id="questionText">
+          Loading question...
+        </h2>
 
-          <textarea 
-            placeholder="Type your answer..."
-            aria-label="Type your answer"></textarea>
+        <textarea
+          id="studentAnswer"
+          placeholder="Write your answer here..."
+        ></textarea>
 
-          <div class="action-buttons">
-            <button class="primary-btn">🎙 Speak Now</button>
-            <button class="secondary-btn">↻ Repeat</button>
-            <button class="gold-btn">✓ Submit</button>
-          </div>
+        <div class="button-group">
+          <button id="startBtn">Start Interview</button>
+          <button id="repeatBtn">Repeat Question</button>
+          <button id="submitBtn">Submit Answer</button>
+          <button id="nextBtn">Next</button>
         </div>
 
-        <div class="feedback-card">
-          <h2>AI FEEDBACK</h2>
-          <p><strong>Good answer!</strong></p>
-          <p>Try this instead:</p>
-          <p class="suggestion">“I’m interested in...”</p>
+        <div id="feedbackPanel" class="feedback-panel">
+          <h3 id="feedbackTitle">Feedback</h3>
+          <p id="feedbackMessage">Waiting for answer...</p>
         </div>
-
-        <button class="next-btn">Next</button>
 
       </section>
 
@@ -85,7 +97,7 @@
 
   </div>
 
-  <!-- JavaScript will be connected later -->
+  <!-- JavaScript controller -->
   <script src="script.js"></script>
 
 </body>
