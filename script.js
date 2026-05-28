@@ -6,6 +6,7 @@ let offTopicWarningCount = 0;
 
 const idleImage = document.getElementById("idleImage");
 const emilyVideo = document.getElementById("emilyVideo");
+emilyVideo.playsInline = true;
 const questionText = document.getElementById("questionText");
 const studentAnswer = document.getElementById("studentAnswer");
 const feedbackMessage = document.getElementById("feedbackMessage");
@@ -40,6 +41,8 @@ function loadIdle() {
   systemBanner.classList.add("hidden");
 
   idleImage.src = interviewData.assets.idle.url;
+  idleImage.style.display = "block";
+  emilyVideo.style.display = "none";
   idleImage.classList.remove("hidden");
 
   emilyVideo.pause();
@@ -76,13 +79,17 @@ function playQuestionVideo() {
 function playAsset(asset, onEndedCallback = null) {
   if (!asset || !asset.url) return;
 
-  idleImage.classList.add("hidden");
-  emilyVideo.classList.remove("hidden");
+  idleImage.style.display = "none";
+  emilyVideo.style.display = "block";
 
   emilyVideo.pause();
-  emilyVideo.src = asset.url;
-  emilyVideo.currentTime = 0;
-  emilyVideo.load();
+emilyVideo.src = asset.url;
+emilyVideo.currentTime = 0;
+
+emilyVideo.muted = false;
+emilyVideo.volume = 1;
+
+emilyVideo.load();
 
   subtitleBox.textContent = asset.subtitle || "";
   updateCaptions(asset);

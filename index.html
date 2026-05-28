@@ -37,24 +37,35 @@
 
       <!-- LEFT PANEL: VIDEO -->
       <section class="video-section">
-  <div class="video-wrapper">
-          <img id="idleImage" class="idle-image" src="" alt="Emily Idle">
 
-<video id="emilyVideo" class="emily-video hidden" autoplay muted playsinline></video>
+  <div class="media-card">
 
-        </div>
+    <img id="idleImage"
+         class="idle-image"
+         src=""
+         alt="Emily Idle">
 
-        <div id="subtitleBox" class="subtitle-box">
-          Emily subtitles will appear here...
-        </div>
+    <video id="emilyVideo"
+       playsinline
+       preload="auto"
+       disablePictureInPicture>
+   </video>
 
-        <div id="systemBanner" class="system-banner hidden"></div>
+  </div>
 
-        <div class="caption-box">
-          <p id="captionText">Listening support text will appear here.</p>
-        </div>
+  <div id="subtitleBox" class="subtitle-box">
+    Emily subtitles will appear here...
+  </div>
 
-      </section>
+  <div id="systemBanner" class="system-banner hidden"></div>
+
+  <div class="caption-box">
+    <p id="captionText">
+      Listening support text will appear here.
+    </p>
+  </div>
+
+</section>
 
       <!-- RIGHT PANEL: INTERVIEW -->
       <section class="interview-panel">
