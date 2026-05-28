@@ -1,0 +1,142 @@
+{
+  "project": "SilverClassroom Emily Interview Coach",
+  "version": "1.0",
+  "mode": "prototype",
+  "settings": {
+    "repeatLimit": 3,
+    "inputMode": "text",
+    "defaultLanguage": "english",
+    "showSubtitles": true,
+    "returnToIdleAfterFinish": true
+  },
+  "assets": {
+    "idle": {
+      "type": "gif",
+      "label": "44_emily_idle",
+      "url": "https://res.cloudinary.com/ducmsnybv/image/upload/q_auto/f_auto/v1779918722/44_idle_j1r9z4.gif"
+    },
+    "intro": {
+      "type": "video",
+      "label": "1_comfortable.mp4",
+      "subtitle": "Hi, my name is Emily and today we'll be conducting your job interview together. Please make yourself comfortable.",
+      "url": "https://res.cloudinary.com/ducmsnybv/video/upload/q_auto/f_auto/v1779679771/1_comfortable_bah1qp.mp4"
+    },
+    "good_feedback": {
+      "type": "video",
+      "label": "25_VERY_GOOD.mp4",
+      "subtitle": "Very good.",
+      "url": "https://res.cloudinary.com/ducmsnybv/video/upload/q_auto/f_auto/v1779679798/25_VERY_GOOD_yys37r.mp4"
+    },
+    "try_again_feedback": {
+      "type": "video",
+      "label": "13_try_this_instead.mp4",
+      "subtitle": "Try this instead.",
+      "url": "https://res.cloudinary.com/ducmsnybv/video/upload/q_auto/f_auto/v1779679801/13_try_instead_j7xgyp.mp4"
+    },
+    "profanity_warning": {
+      "type": "video",
+      "label": "14_be_respectful.mp4",
+      "subtitle": "Please use respectful language during the interview. Let's return to the interview questions.",
+      "url": "https://res.cloudinary.com/ducmsnybv/video/upload/q_auto/f_auto/v1779679801/14_be_respectful_pbuebg.mp4"
+    },
+    "finish": {
+      "type": "video",
+      "label": "30_woderful_day.mp4",
+      "subtitle": "Thank you very much for your time today. It was a pleasure speaking with you and we'll be in touch. Have a wonderful day.",
+      "url": "https://res.cloudinary.com/ducmsnybv/video/upload/q_auto/f_auto/v1779679802/30_have_wonderful_day_txjidv.mp4"
+    },
+    "english_warning": {
+      "type": "video",
+      "label": "40_english.mp4",
+      "subtitle": "Oh, would you mind saying it in English?",
+      "url": "https://res.cloudinary.com/ducmsnybv/video/upload/q_auto/f_auto/v1779859202/40_in_english_jurkc9.mp4"
+    },
+    "english_practice": {
+      "type": "video",
+      "label": "41_english_practice.mp4",
+      "subtitle": "I do understand Spanish, but you are here to practice English language!",
+      "url": "https://res.cloudinary.com/ducmsnybv/video/upload/q_auto/f_auto/v1779859212/41_english_practice_puht4p.mp4"
+    },
+    "off_topic_1": {
+      "type": "video",
+      "label": "42_off_topic_1.mp4",
+      "subtitle": "We can come back later to that topic. For now, let's focus on the main objective, please.",
+      "url": "https://res.cloudinary.com/ducmsnybv/video/upload/q_auto/f_auto/v1779859225/42_off_topic_1_on8ukc.mp4"
+    },
+    "off_topic_2": {
+      "type": "video",
+      "label": "43_off_topic_2.mp4",
+      "subtitle": "That's an interesting topic. Yet, we are here to develop your English skills in a context of a job interview.",
+      "url": "https://res.cloudinary.com/ducmsnybv/video/upload/q_auto/f_auto/v1779859235/43_off_topic_2_atxnhq.mp4"
+    }
+  },
+  "interview": {
+    "title": "Emily Interview Coach - Prototype 1",
+    "description": "A one-question interview prototype for testing JSON flow and JavaScript logic.",
+    "startSequence": [
+      "idle",
+      "intro",
+      "question_1"
+    ],
+    "questions": [
+      {
+        "id": "question_1",
+        "number": 1,
+        "state": "asking_question",
+        "video": {
+          "type": "video",
+          "label": "2_interested_in.mp4",
+          "subtitle": "What is the position you are interested in?",
+          "url": "https://res.cloudinary.com/ducmsnybv/video/upload/q_auto/f_auto/v1779679770/2_interested_in_uwldpc.mp4"
+        },
+        "prompt": "What is the position you are interested in?",
+        "expectedAnswerType": "job_position",
+        "studentInput": {
+          "type": "text",
+          "placeholder": "Write your answer here. Example: I am interested in the position of sales assistant.",
+          "minWords": 3,
+          "maxWords": 60
+        },
+        "repeat": {
+          "allowed": true,
+          "limit": 3,
+          "onLimitReached": {
+            "type": "banner",
+            "message": "You have reached the repeat limit for this question. Please use the subtitles button if you need support. Let’s continue with the interview."
+          }
+        },
+        "validationRules": {
+          "detectSpanish": true,
+          "detectProfanity": true,
+          "detectOffTopic": true,
+          "detectEmptyAnswer": true
+        },
+        "feedbackMap": {
+          "good_answer": "good_feedback",
+          "needs_improvement": "try_again_feedback",
+          "spanish_detected_first_time": "english_warning",
+          "spanish_detected_second_time": "english_practice",
+          "off_topic_first_time": "off_topic_1",
+          "off_topic_second_time": "off_topic_2",
+          "profanity_detected": "profanity_warning",
+          "empty_answer": "try_again_feedback"
+        },
+        "next": {
+          "afterGoodAnswer": "finish",
+          "afterNeedsImprovement": "question_1",
+          "afterWarning": "question_1"
+        }
+      }
+    ],
+    "endSequence": [
+      "finish",
+      "idle"
+    ]
+  },
+  "humanInterfaceInstructions": {
+    "whereToPlaceFile": "Create a new file named interview-flow.json in the same folder as index.html, style.css, and script.js.",
+    "scriptConnection": "In script.js, load this JSON file using fetch('interview-flow.json'). The JavaScript should read the video URLs, subtitles, repeat limit, question prompt, and feedbackMap from this file instead of hard-coding them directly into the script.",
+    "htmlRequirement": "Make sure index.html includes the JavaScript file at the bottom of the body section using: <script src=\"script.js\"></script>",
+    "importantNote": "Do not place this JSON inside the HTML file. Keep it as a separate file so the interview flow can be expanded later without rewriting the full interface."
+  }
+}
