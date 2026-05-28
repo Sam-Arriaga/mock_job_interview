@@ -36,23 +36,12 @@
     <main class="main-layout">
 
       <!-- LEFT PANEL: VIDEO -->
-      <section class="video-panel">
+      <section class="video-section">
+  <div class="video-wrapper">
+          <img id="idleImage" class="idle-image" src="" alt="Emily Idle">
 
-        <div class="video-container">
-          <img
-            id="idleImage"
-            src=""
-            alt="Emily Idle"
-            class="idle-image"
-          />
+<video id="emilyVideo" class="emily-video hidden" autoplay muted playsinline></video>
 
-          <video
-            id="emilyVideo"
-            class="emily-video"
-            autoplay
-            muted
-            playsinline
-          ></video>
         </div>
 
         <div id="subtitleBox" class="subtitle-box">
@@ -70,28 +59,20 @@
       <!-- RIGHT PANEL: INTERVIEW -->
       <section class="interview-panel">
 
-        <h2 id="questionText">
-          Loading question...
-        </h2>
+      <h2 id="questionText">Loading question...</h2>
 
-        <textarea
-          id="studentAnswer"
-          placeholder="Write your answer here..."
-        ></textarea>
+        <textarea id="studentAnswer" placeholder="Write your answer here..."></textarea>
 
-        <div class="button-group">
+         <div class="button-group">
           <button id="startBtn">Start Interview</button>
           <button id="repeatBtn">Repeat Question</button>
           <button id="submitBtn">Submit Answer</button>
           <button id="nextBtn">Next</button>
-        </div>
+         </div>
 
-        <div id="feedbackPanel" class="feedback-panel">
-          <h3 id="feedbackTitle">Feedback</h3>
-          <p id="feedbackMessage">Waiting for answer...</p>
-        </div>
+  <p id="feedbackMessage">Waiting for answer...</p>
 
-      </section>
+</section>
 
     </main>
 

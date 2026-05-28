@@ -41,21 +41,44 @@ body{
 }
 
 /* SHIELD */
-.logo-shield{
-    width:40px;
-    height:40px;
-
-    border:2px solid #d4af37;
-    border-radius:10px;
-
-    display:flex;
-    justify-content:center;
-    align-items:center;
-
-    color:#d4af37;
-    font-weight:bold;
-    font-size:20px;
+.logo-shield {
+  width: 48px;
+  height: 48px;
+  border: 2px solid #d4af37;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #d4af37;
+  font-weight: 800;
+  font-size: 24px;
+  box-shadow: 0 0 0 1px rgba(212, 175, 55, 0.15);
 }
+
+.button-group {
+  display: flex;
+  gap: 12px;
+  margin-top: 22px;
+  flex-wrap: wrap;
+}
+
+.button-group button {
+  border: none;
+  border-radius: 12px;
+  padding: 12px 18px;
+  font-weight: 700;
+  cursor: pointer;
+  background: #163f73;
+  color: white;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+}
+
+.button-group button:hover {
+  background: #d4af37;
+  color: #0f172a;
+  transform: translateY(-1px);
+}
+
 
 /* HEADER CONTROLS */
 .header-controls{
@@ -125,8 +148,19 @@ body{
 /* VIDEO */
 video{
     width:100%;
-
     border-radius:15px;
+    display:block;
+}
+
+.emily-video,
+.idle-image{
+    width:100%;
+    border-radius:18px;
+    display:block;
+}
+
+.hidden{
+    display:none;
 }
 
 /* CAPTION BOX */
@@ -214,62 +248,7 @@ button{
     transition:0.3s;
 }
 
-/* PRIMARY BUTTON */
-.primary-btn{
-    flex:1;
 
-    background:#0f172a;
-    color:white;
-
-    padding:18px;
-
-    border-radius:15px;
-
-    font-size:18px;
-}
-
-/* SECONDARY BUTTON */
-.secondary-btn{
-    flex:1;
-
-    background:white;
-    color:#111827;
-
-    border:2px solid #d1d5db;
-
-    padding:18px;
-
-    border-radius:15px;
-
-    font-size:18px;
-}
-
-/* GOLD BUTTON */
-.gold-btn{
-    flex:1;
-
-    background:#d4af37;
-    color:white;
-
-    padding:18px;
-
-    border-radius:15px;
-
-    font-size:18px;
-}
-
-/* BUTTON HOVER */
-.primary-btn:hover{
-    background:#1e293b;
-}
-
-.secondary-btn:hover{
-    background:#f3f4f6;
-}
-
-.gold-btn:hover{
-    background:#b8860b;
-}
 
 /* FEEDBACK */
 .feedback-card p{
