@@ -15,7 +15,11 @@
     <!-- HEADER -->
     <header class="app-header">
       <div class="brand">
-        <div class="logo-shield">S</div>
+        <img 
+         src="videos/silverclassroom_shield.png"
+         alt="SilverClassroom logo" 
+         class="logo-shield"
+        />
         <span>SILVERCLASSROOM</span>
       </div>
 
@@ -72,16 +76,20 @@
 
       <h2 id="questionText">Loading question...</h2>
 
-        <textarea id="studentAnswer" placeholder="Write your answer here..."></textarea>
+        <textarea
+          id="studentAnswer"
+          placeholder="Use this space if you need to type your answer or if your microphone is not available."
+         ></textarea>
 
          <div class="button-group">
           <button id="startBtn">Start Interview</button>
           <button id="repeatBtn">Repeat Question</button>
+          <button id="speakBtn">🎙 Speak Now</button>
           <button id="submitBtn">Submit Answer</button>
           <button id="nextBtn">Next</button>
          </div>
 
-  <p id="feedbackMessage">Waiting for answer...</p>
+  <p id="feedbackMessage">Waiting to start...</p>
 
 </section>
 

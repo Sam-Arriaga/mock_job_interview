@@ -15,7 +15,7 @@ const captionText = document.getElementById("captionText");
 const systemBanner = document.getElementById("systemBanner");
 const progressLabel = document.getElementById("progressLabel");
 const captionMode = document.getElementById("captionMode");
-
+const speakBtn = document.getElementById("speakBtn");
 const startBtn = document.getElementById("startBtn");
 const repeatBtn = document.getElementById("repeatBtn");
 const submitBtn = document.getElementById("submitBtn");
@@ -39,7 +39,8 @@ function loadIdle() {
   captionText.textContent = "Emily will ask you one short job interview question.";
   feedbackMessage.textContent = "Waiting to start...";
   systemBanner.classList.add("hidden");
-
+  speakBtn.disabled = true;
+  
   idleImage.src = interviewData.assets.idle.url;
   idleImage.style.display = "block";
   emilyVideo.style.display = "none";
@@ -56,6 +57,7 @@ function startInterview() {
   repeatCount = 0;
   spanishWarningCount = 0;
   offTopicWarningCount = 0;
+  speakBtn.disabled = false;
 
   progressLabel.textContent = "Progress: 1 / 1";
   questionText.textContent = "Introduction";
@@ -255,7 +257,43 @@ function isOffTopic(text) {
 
   return !jobWords.some(word => lowerText.includes(word));
 }
+const SpeechRecognition =
+  window.SpeechRecognition || window.webkitSpeechRecognition;
 
+if (!SpeechRecognition) {
+  speakBtn.disabled = true;
+  speakBtn.textContent = "Speech not supported";
+} else {
+  const recognition = new SpeechRecognition();
+
+  recognition.lang = "en-US";
+  recognition.interimResults = false;
+  recognition.continuous = false;
+
+  speakBtn.addEventListener("click", () => {
+    feedbackMessage.textContent = "Listening... please speak now.";
+    speakBtn.textContent = "🎙 Listening...";
+    recognition.start();
+  });
+
+  recognition.onresult = (event) => {
+  const spokenText = event.results[0][0].transcript;
+
+  studentAnswer.value += " " + spokenText;
+    feedbackMessage.textContent = "Speech captured. You can submit your answer.";
+    speakBtn.textContent = "🎙 Speak Now";
+  };
+
+  recognition.onerror = () => {
+    feedbackMessage.textContent =
+      "Microphone problem. You can type your answer instead.";
+    speakBtn.textContent = "🎙 Speak Now";
+  };
+
+  recognition.onend = () => {
+    speakBtn.textContent = "🎙 Speak Now";
+  };
+}
 startBtn.addEventListener("click", startInterview);
 repeatBtn.addEventListener("click", repeatQuestion);
 submitBtn.addEventListener("click", submitAnswer);

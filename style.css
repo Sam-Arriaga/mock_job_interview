@@ -42,17 +42,9 @@ body{
 
 /* SHIELD */
 .logo-shield {
-  width: 48px;
-  height: 48px;
-  border: 2px solid #d4af37;
-  border-radius: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #d4af37;
-  font-weight: 800;
-  font-size: 24px;
-  box-shadow: 0 0 0 1px rgba(212, 175, 55, 0.15);
+  width: 54px;
+  height: 54px;
+  object-fit: contain;
 }
 
 .button-group {
@@ -244,6 +236,15 @@ button{
 .suggestion{
     font-style:italic;
     color:#1e3a8a;
+}
+#speakBtn {
+  background: #d4af37;
+  color: #0f172a;
+  font-weight: bold;
+}
+
+#speakBtn:hover {
+  background: #f3c94c;
 }
 
 /* NEXT BUTTON */
