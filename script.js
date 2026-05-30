@@ -126,7 +126,7 @@ function repeatQuestion() {
   playQuestionVideo();
 }
 
-function submitAnswer() {
+async function submitAnswer() {
   if (!currentQuestion) return;
 
   const answer = studentAnswer.value.trim();
@@ -159,7 +159,7 @@ function submitAnswer() {
 
     return;
   }
-
+/*
   if (isOffTopic(answer)) {
     offTopicWarningCount++;
 
@@ -173,17 +173,36 @@ function submitAnswer() {
 
     return;
   }
+*/
+if (wordCount < 3) {
+  feedbackMessage.textContent = "Good start. Please write a little more so Emily can help you.";
+  return;
+}
 
-  if (wordCount < currentQuestion.studentInput.minWords) {
+  feedbackMessage.textContent = "Emily is analyzing your answer...";
+
+  try {
+    const response = await fetch("http://localhost:3000/feedback", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        question: currentQuestion.prompt,
+        answer: answer
+      })
+    });
+
+    const data = await response.json();
+
+    feedbackMessage.textContent = data.feedback;
+    playFeedback("good_answer");
+
+    } catch (error) {
+    console.error(error);
     feedbackMessage.textContent =
-      "Try to write a little more. Example: I am interested in the position of sales assistant.";
-    playFeedback("needs_improvement");
-    return;
+      "Emily API is not available. Please check if the server is running.";
   }
-
-  feedbackMessage.textContent =
-    "Good answer. Your response is clear and appropriate for the interview.";
-  playFeedback("good_answer");
 }
 
 function playFeedback(feedbackKey) {
