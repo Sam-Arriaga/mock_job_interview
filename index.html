@@ -16,15 +16,15 @@
     <header class="app-header">
       <div class="brand">
         <img 
-         src="videos/silverclassroom_shield.png"
-         alt="SilverClassroom logo" 
-         class="logo-shield"
+          src="videos/silverclassroom_shield.png"
+          alt="SilverClassroom logo" 
+          class="logo-shield"
         />
         <span>SILVERCLASSROOM</span>
       </div>
 
       <div class="header-controls">
-        <span id="progressLabel" class="progress-label">Progress: 1 / 1</span>
+        <span id="progressLabel" class="progress-label">Progress: 0 / 7</span>
 
         <select id="captionMode" class="listening-support" aria-label="Listening Support">
           <option value="none">No Captions</option>
@@ -32,66 +32,106 @@
           <option value="full">Full Captions</option>
         </select>
 
-        <button class="settings-btn" aria-label="Settings">☰</button>
+        <button id="menuBtn" class="settings-btn" aria-label="Menu">☰</button>
       </div>
     </header>
 
     <!-- MAIN CONTENT -->
     <main class="main-layout">
 
-      <!-- LEFT PANEL: VIDEO -->
+      <!-- VIDEO SECTION -->
       <section class="video-section">
 
-  <div class="media-card">
+        <div class="media-card">
 
-    <img id="idleImage"
-         class="idle-image"
-         src=""
-         alt="Emily Idle">
+          <img 
+            id="idleImage"
+            class="idle-image"
+            src=""
+            alt="Emily Idle"
+          />
 
-    <video id="emilyVideo"
-       playsinline
-       preload="auto"
-       disablePictureInPicture>
-   </video>
+          <video 
+            id="emilyVideo"
+            playsinline
+            preload="auto"
+            disablePictureInPicture>
+          </video>
 
-  </div>
+        </div>
 
-  <div id="subtitleBox" class="subtitle-box">
-    Emily subtitles will appear here...
-  </div>
+        <!-- PROGRESS BAR -->
+        <div class="progress-bar" aria-label="Interview progress">
+          <span class="progress-step active"></span>
+          <span class="progress-step"></span>
+          <span class="progress-step"></span>
+          <span class="progress-step"></span>
+          <span class="progress-step"></span>
+          <span class="progress-step"></span>
+          <span class="progress-step"></span>
+        </div>
 
-  <div id="systemBanner" class="system-banner hidden"></div>
+        <!-- SUBTITLES -->
+        <div id="subtitleBox" class="subtitle-box">
+          Emily subtitles will appear here...
+        </div>
 
-  <div class="caption-box">
-    <p id="captionText">
-      Listening support text will appear here.
-    </p>
-  </div>
+        <div id="systemBanner" class="system-banner hidden"></div>
 
-</section>
+        <div class="caption-box">
+          <p id="captionText">
+            Listening support text will appear here.
+          </p>
+        </div>
 
-      <!-- RIGHT PANEL: INTERVIEW -->
+      </section>
+
+      <!-- INTERVIEW SECTION -->
       <section class="interview-panel">
 
-      <h2 id="questionText">Loading question...</h2>
+        <h2 id="questionText">Loading question...</h2>
 
         <textarea
           id="studentAnswer"
-          placeholder="Use this space if you need to type your answer or if your microphone is not available."
-         ></textarea>
+          placeholder="Use this space if you need to type your answer or if your microphone is not available.">
+        </textarea>
 
-         <div class="button-group">
+        <!-- MAIN BUTTONS -->
+        <div class="button-group primary-buttons">
           <button id="startBtn">Start Interview</button>
-          <button id="repeatBtn">Repeat Question</button>
           <button id="speakBtn">🎙 Speak Now</button>
           <button id="submitBtn">Submit Answer</button>
+        </div>
+
+        <!-- SECONDARY BUTTONS -->
+        <div class="button-group secondary-buttons">
+          <button id="clearBtn">Clear</button>
           <button id="nextBtn">Next</button>
-         </div>
 
-  <p id="feedbackMessage">Waiting to start...</p>
+          <div class="help-menu">
+            <button id="helpBtn">Help ▾</button>
 
-</section>
+            <div id="helpOptions" class="help-options hidden">
+              <button id="repeatBtn">Repeat Question</button>
+              <button id="hintBtn">Hint</button>
+              <button id="exampleBtn">Example Answer</button>
+              <button id="instructionsBtn">Instructions</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- HELP PANEL -->
+        <div id="helpPanel" class="help-panel hidden">
+          <h3 id="helpPanelTitle">Help</h3>
+          <p id="helpPanelText">
+            Select Hint, Example Answer, or Instructions.
+          </p>
+        </div>
+
+        <!-- FEEDBACK -->
+        <p id="feedbackMessage">Waiting to start...</p>
+
+      </section>
 
     </main>
 
