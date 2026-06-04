@@ -4,141 +4,108 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SilverClassroom | Emily Interview Coach</title>
-
   <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
+  <div class="app-shell">
 
-  <div class="app-container">
-
-    <!-- HEADER -->
     <header class="app-header">
-      <div class="brand">
-        <img 
-          src="videos/silverclassroom_shield.png"
-          alt="SilverClassroom logo" 
-          class="logo-shield"
-        />
-        <span>SILVERCLASSROOM</span>
-      </div>
+      <img
+        src="videos/silverclassroom_shield.png"
+        alt="SilverClassroom"
+        class="app-logo"
+      />
 
-      <div class="header-controls">
-        <span id="progressLabel" class="progress-label">Progress: 0 / 7</span>
-
-        <select id="captionMode" class="listening-support" aria-label="Listening Support">
-          <option value="none">No Captions</option>
-          <option value="key">Key Ideas Only</option>
-          <option value="full">Full Captions</option>
-        </select>
-
-        <button id="menuBtn" class="settings-btn" aria-label="Menu">☰</button>
-      </div>
+      <button id="menuBtn" class="icon-button" aria-label="Open menu">
+        ☰
+      </button>
     </header>
 
-    <!-- MAIN CONTENT -->
-    <main class="main-layout">
+    <main class="coach-screen">
 
-      <!-- VIDEO SECTION -->
-      <section class="video-section">
+      <section class="progress-area" title="Interview progress">
+        <div class="progress-dots" aria-label="Interview progress">
+          <span class="progress-dot active"></span>
+          <span class="progress-dot"></span>
+          <span class="progress-dot"></span>
+          <span class="progress-dot"></span>
+          <span class="progress-dot"></span>
+          <span class="progress-dot"></span>
+          <span class="progress-dot"></span>
+        </div>
+      </section>
 
-        <div class="media-card">
-
-          <img 
+      <section class="video-area">
+        <div class="video-card">
+          <img
             id="idleImage"
-            class="idle-image"
+            class="coach-media"
             src=""
-            alt="Emily Idle"
+            alt="Emily waiting"
           />
 
-          <video 
+          <video
             id="emilyVideo"
+            class="coach-media hidden"
             playsinline
             preload="auto"
             disablePictureInPicture>
           </video>
-
         </div>
-
-        <!-- PROGRESS BAR -->
-        <div class="progress-bar" aria-label="Interview progress">
-          <span class="progress-step active"></span>
-          <span class="progress-step"></span>
-          <span class="progress-step"></span>
-          <span class="progress-step"></span>
-          <span class="progress-step"></span>
-          <span class="progress-step"></span>
-          <span class="progress-step"></span>
-        </div>
-
-        <!-- SUBTITLES -->
-        <div id="subtitleBox" class="subtitle-box">
-          Emily subtitles will appear here...
-        </div>
-
-        <div id="systemBanner" class="system-banner hidden"></div>
-
-        <div class="caption-box">
-          <p id="captionText">
-            Listening support text will appear here.
-          </p>
-        </div>
-
       </section>
 
-      <!-- INTERVIEW SECTION -->
-      <section class="interview-panel">
+      <section id="feedbackBox" class="feedback-box" aria-live="polite">
+        Click ➡️ to start when you are ready.
+      </section>
 
-        <h2 id="questionText">Loading question...</h2>
-
+      <section class="answer-area">
         <textarea
           id="studentAnswer"
-          placeholder="Use this space if you need to type your answer or if your microphone is not available.">
-        </textarea>
-
-        <!-- MAIN BUTTONS -->
-        <div class="button-group primary-buttons">
-          <button id="startBtn">Start Interview</button>
-          <button id="speakBtn">🎙 Speak Now</button>
-          <button id="submitBtn">Submit Answer</button>
-        </div>
-
-        <!-- SECONDARY BUTTONS -->
-        <div class="button-group secondary-buttons">
-          <button id="clearBtn">Clear</button>
-          <button id="nextBtn">Next</button>
-
-          <div class="help-menu">
-            <button id="helpBtn">Help ▾</button>
-
-            <div id="helpOptions" class="help-options hidden">
-              <button id="repeatBtn">Repeat Question</button>
-              <button id="hintBtn">Hint</button>
-              <button id="exampleBtn">Example Answer</button>
-              <button id="instructionsBtn">Instructions</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- HELP PANEL -->
-        <div id="helpPanel" class="help-panel hidden">
-          <h3 id="helpPanelTitle">Help</h3>
-          <p id="helpPanelText">
-            Select Hint, Example Answer, or Instructions.
-          </p>
-        </div>
-
-        <!-- FEEDBACK -->
-        <p id="feedbackMessage">Waiting to start...</p>
-
+          class="answer-input"
+          placeholder="Type your answer here if needed…"></textarea>
       </section>
 
     </main>
 
+    <nav class="action-bar" aria-label="Interview controls">
+      <button id="backBtn" class="action-btn">⬅️<span>Back</span></button>
+      <button id="clearBtn" class="action-btn">🧹<span>Clear</span></button>
+      <button id="speakBtn" class="action-btn speak">🎤<span>Speak</span></button>
+      <button id="submitBtn" class="action-btn">✅<span>Submit</span></button>
+      <button id="nextBtn" class="action-btn primary">➡️<span>Start</span></button>
+    </nav>
+
   </div>
 
-  <!-- JavaScript controller -->
-  <script src="script.js"></script>
+  <div id="menuOverlay" class="menu-overlay hidden">
+    <aside class="side-menu" role="dialog" aria-modal="true" aria-labelledby="menuTitle">
+      <div class="menu-header">
+        <h2 id="menuTitle">Emily Coach Menu</h2>
+        <button id="closeMenuBtn" class="close-button" aria-label="Close menu">×</button>
+      </div>
 
+      <div class="menu-section">
+        <h3>💡 Learning Support</h3>
+        <button id="repeatBtn" class="menu-item">Repeat question</button>
+        <button id="hintBtn" class="menu-item">Hint</button>
+        <button id="captionsBtn" class="menu-item">Captions</button>
+        <button id="modelAnswerBtn" class="menu-item">Modeling answer</button>
+        <button id="slowModeBtn" class="menu-item">Slow mode</button>
+      </div>
+
+      <div class="menu-section">
+        <h3>📘 Instructions Manual</h3>
+        <button id="instructionsBtn" class="menu-item">Open instructions</button>
+      </div>
+
+      <div class="menu-section danger-zone">
+        <button id="restartBtn" class="menu-item warning">🔄 Restart Interview</button>
+        <button id="finishBtn" class="menu-item danger">🚪 Finish Interview</button>
+      </div>
+    </aside>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
