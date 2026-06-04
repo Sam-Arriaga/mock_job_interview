@@ -71,10 +71,9 @@ button {
   z-index: 20;
 }
 
-.app-logo {
-  width: 42px;
-  height: 42px;
-  object-fit: contain;
+.app-logo{
+   width: 52px;
+   height: 52px;
 }
 
 .icon-button {

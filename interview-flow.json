@@ -1,6 +1,6 @@
 {
   "project": "SilverClassroom Emily Interview Coach",
-  "version": "2.0",
+  "version": "2.1",
   "mode": "horizontal_16_9",
   "settings": {
     "repeatLimit": 3,
@@ -8,6 +8,25 @@
     "defaultCaptionMode": "full",
     "returnToIdleAfterFinish": true,
     "totalQuestions": 7
+  },
+  "globalValidation": {
+    "priorityOrder": [
+      "profanity_detected",
+      "spanish_detected",
+      "off_topic",
+      "empty_answer",
+      "too_short",
+      "partial_answer",
+      "good_answer"
+    ],
+    "profanityList": [
+      "fuck",
+      "fucking",
+      "shit",
+      "bitch",
+      "asshole",
+      "damn"
+    ]
   },
   "assets": {
     "idle": {
@@ -108,8 +127,40 @@
         "id": "question_1",
         "number": 1,
         "prompt": "What is the position you are interested in?",
-        "hint": "Mention only the job position. Keep it short and simple.",
-        "exampleAnswer": "I am interested in the position of administrative assistant.",
+        "hint": "Mention a job or professional area using a complete sentence.",
+        "modelingPrompt": "Try reading this.",
+        "exampleAnswer": "I am interested in working as a legal advisor.",
+        "modelAnswers": [
+          "I am interested in the position of administrative assistant.",
+          "I want to work as a lawyer.",
+          "I am interested in working as a legal advisor.",
+          "I am interested in working in finance."
+        ],
+        "acceptablePatterns": [
+          "i am interested in the position of",
+          "i'm interested in the position of",
+          "i want to work as",
+          "i would like to work as",
+          "i am interested in working as",
+          "i'm interested in working as",
+          "i am interested in working in",
+          "i'm interested in working in"
+        ],
+        "keywords": [
+          "accountant",
+          "lawyer",
+          "legal advisor",
+          "administrative assistant",
+          "sales assistant",
+          "manager",
+          "project manager",
+          "teacher",
+          "engineer",
+          "finance",
+          "marketing",
+          "human resources",
+          "business administration"
+        ],
         "expectedAnswerType": "job_position",
         "video": {
           "type": "video",
@@ -119,8 +170,8 @@
         },
         "studentInput": {
           "type": "speech_or_text",
-          "placeholder": "Example: I am interested in the position of sales assistant.",
-          "minWords": 3,
+          "placeholder": "Example: I am interested in working as a legal advisor.",
+          "minWords": 4,
           "maxWords": 60
         },
         "repeat": {
@@ -128,345 +179,45 @@
           "limit": 3,
           "onLimitReached": {
             "type": "banner",
-            "message": "You have reached the repeat limit. Please use Hint or Example Answer if you need support."
+            "message": "You have reached the repeat limit. Please use Hint or Modeling Answer if you need support."
           }
         },
         "validationRules": {
           "detectSpanish": true,
           "detectProfanity": true,
           "detectOffTopic": false,
-          "detectEmptyAnswer": true
+          "detectEmptyAnswer": true,
+          "detectTooShort": true,
+          "detectPartialAnswer": true
         },
         "feedbackMap": {
           "good_answer": "doing_great_feedback",
-          "needs_improvement": "try_again_feedback",
+          "excellent_answer": "awesome_feedback",
           "partial_answer": "try_reading_feedback",
+          "needs_improvement": "try_again_feedback",
+          "too_short": "try_again_feedback",
           "spanish_detected_first_time": "english_warning",
           "spanish_detected_second_time": "english_practice",
           "off_topic_first_time": "off_topic_1",
           "off_topic_second_time": "off_topic_2",
           "profanity_detected": "profanity_warning",
-          "empty_answer": "try_again_feedback"
+          "empty_answer": "try_again_feedback",
+          "hint_requested": "clarify_feedback",
+          "modeling_requested": "try_reading_feedback"
+        },
+        "feedbackText": {
+          "good_answer": "Great. You mentioned the position clearly.",
+          "partial_answer": "Try this: “I am interested in working as a legal advisor.”",
+          "too_short": "Please answer with a complete sentence. Example: “I am interested in working as a legal advisor.”",
+          "spanish_detected": "Please answer in English. Example: “I am interested in working as a legal advisor.”",
+          "profanity_detected": "Please use professional language during the interview. Let's try again.",
+          "hint_requested": "Hint: Say the job or professional area you want. Use: “I am interested in working as...”",
+          "modeling_requested": "Model answer: “I am interested in working as a legal advisor.”"
         },
         "next": {
           "afterGoodAnswer": "question_2",
           "afterNeedsImprovement": "question_1",
           "afterWarning": "question_1"
-        }
-      },
-      {
-        "id": "question_2",
-        "number": 2,
-        "prompt": "What is your major?",
-        "hint": "Say your university major or academic area.",
-        "exampleAnswer": "My major is accounting.",
-        "expectedAnswerType": "academic_background",
-        "video": {
-          "type": "video",
-          "label": "3_Q2_academic_background.mp4",
-          "subtitle": "Let's start by talking about your academic background. What is your major?",
-          "url": "https://res.cloudinary.com/ducmsnybv/video/upload/q_auto/f_auto/v1780372653/3_Q2_academic_background_k4vfaq.mp4"
-        },
-        "studentInput": {
-          "type": "speech_or_text",
-          "placeholder": "Example: My major is business administration.",
-          "minWords": 3,
-          "maxWords": 60
-        },
-        "repeat": {
-          "allowed": true,
-          "limit": 3,
-          "onLimitReached": {
-            "type": "banner",
-            "message": "You have reached the repeat limit. Please use Hint or Example Answer if you need support."
-          }
-        },
-        "validationRules": {
-          "detectSpanish": true,
-          "detectProfanity": true,
-          "detectOffTopic": false,
-          "detectEmptyAnswer": true
-        },
-        "feedbackMap": {
-          "good_answer": "awesome_feedback",
-          "needs_improvement": "try_again_feedback",
-          "partial_answer": "try_reading_feedback",
-          "spanish_detected_first_time": "english_warning",
-          "spanish_detected_second_time": "english_practice",
-          "off_topic_first_time": "off_topic_1",
-          "off_topic_second_time": "off_topic_2",
-          "profanity_detected": "profanity_warning",
-          "empty_answer": "try_again_feedback"
-        },
-        "next": {
-          "afterGoodAnswer": "question_3",
-          "afterNeedsImprovement": "question_2",
-          "afterWarning": "question_2"
-        }
-      },
-      {
-        "id": "question_3",
-        "number": 3,
-        "prompt": "Tell me about some responsibilities you have had at school, work, or during internships. What have you been responsible for?",
-        "hint": "Mention one or two responsibilities. You can talk about school, work, or internships.",
-        "exampleAnswer": "I have been responsible for organizing documents and helping my team with reports.",
-        "expectedAnswerType": "responsibilities",
-        "video": {
-          "type": "video",
-          "label": "4_Q3_responsibilities_Good.mp4",
-          "subtitle": "Tell me about some responsibilities you have had at school, work or during internships. What have you been responsible for?",
-          "url": "https://res.cloudinary.com/ducmsnybv/video/upload/q_auto/f_auto/v1780372655/4_Q3_responsibilities_d1osqb.mp4"
-        },
-        "studentInput": {
-          "type": "speech_or_text",
-          "placeholder": "Example: I have been responsible for organizing documents.",
-          "minWords": 5,
-          "maxWords": 80
-        },
-        "repeat": {
-          "allowed": true,
-          "limit": 3,
-          "onLimitReached": {
-            "type": "banner",
-            "message": "You have reached the repeat limit. Please use Hint or Example Answer if you need support."
-          }
-        },
-        "validationRules": {
-          "detectSpanish": true,
-          "detectProfanity": true,
-          "detectOffTopic": true,
-          "detectEmptyAnswer": true
-        },
-        "feedbackMap": {
-          "good_answer": "excellent_feedback",
-          "needs_improvement": "try_again_feedback",
-          "partial_answer": "try_reading_feedback",
-          "spanish_detected_first_time": "english_warning",
-          "spanish_detected_second_time": "english_practice",
-          "off_topic_first_time": "off_topic_1",
-          "off_topic_second_time": "off_topic_2",
-          "profanity_detected": "profanity_warning",
-          "empty_answer": "try_again_feedback"
-        },
-        "next": {
-          "afterGoodAnswer": "question_4",
-          "afterNeedsImprovement": "question_3",
-          "afterWarning": "question_3"
-        }
-      },
-      {
-        "id": "question_4",
-        "number": 4,
-        "prompt": "What activities are you interested in doing outside of school or work?",
-        "hint": "Mention one activity you enjoy or want to do outside school or work.",
-        "exampleAnswer": "I am interested in going to the gym and learning new skills online.",
-        "expectedAnswerType": "personal_interests",
-        "video": {
-          "type": "video",
-          "label": "5_Q4_activities.mp4",
-          "subtitle": "What activities are you interested in doing outside of school or work?",
-          "url": "https://res.cloudinary.com/ducmsnybv/video/upload/q_auto/f_auto/v1780372654/5_Q4_activities_jbragk.mp4"
-        },
-        "studentInput": {
-          "type": "speech_or_text",
-          "placeholder": "Example: I am interested in reading and exercising.",
-          "minWords": 5,
-          "maxWords": 80
-        },
-        "repeat": {
-          "allowed": true,
-          "limit": 3,
-          "onLimitReached": {
-            "type": "banner",
-            "message": "You have reached the repeat limit. Please use Hint or Example Answer if you need support."
-          }
-        },
-        "validationRules": {
-          "detectSpanish": true,
-          "detectProfanity": true,
-          "detectOffTopic": false,
-          "detectEmptyAnswer": true
-        },
-        "feedbackMap": {
-          "good_answer": "doing_great_feedback",
-          "needs_improvement": "try_again_feedback",
-          "partial_answer": "try_reading_feedback",
-          "spanish_detected_first_time": "english_warning",
-          "spanish_detected_second_time": "english_practice",
-          "off_topic_first_time": "off_topic_1",
-          "off_topic_second_time": "off_topic_2",
-          "profanity_detected": "profanity_warning",
-          "empty_answer": "try_again_feedback"
-        },
-        "next": {
-          "afterGoodAnswer": "question_5",
-          "afterNeedsImprovement": "question_4",
-          "afterWarning": "question_4"
-        }
-      },
-      {
-        "id": "question_5",
-        "number": 5,
-        "prompt": "What are you good at? And what skills do you feel confident about using in a professional environment?",
-        "hint": "Mention one skill you feel confident about using at work.",
-        "exampleAnswer": "I am good at communicating with people and organizing information.",
-        "expectedAnswerType": "skills",
-        "video": {
-          "type": "video",
-          "label": "6_Q5_good_at.mp4",
-          "subtitle": "What are you good at? And what skills do you feel confident about using in a professional environment?",
-          "url": "https://res.cloudinary.com/ducmsnybv/video/upload/q_auto/f_auto/v1780372654/6_Q5_good_at_pwplre.mp4"
-        },
-        "studentInput": {
-          "type": "speech_or_text",
-          "placeholder": "Example: I am good at teamwork and problem solving.",
-          "minWords": 5,
-          "maxWords": 80
-        },
-        "repeat": {
-          "allowed": true,
-          "limit": 3,
-          "onLimitReached": {
-            "type": "banner",
-            "message": "You have reached the repeat limit. Please use Hint or Example Answer if you need support."
-          }
-        },
-        "validationRules": {
-          "detectSpanish": true,
-          "detectProfanity": true,
-          "detectOffTopic": true,
-          "detectEmptyAnswer": true
-        },
-        "feedbackMap": {
-          "good_answer": "excellent_feedback",
-          "needs_improvement": "try_again_feedback",
-          "partial_answer": "try_reading_feedback",
-          "spanish_detected_first_time": "english_warning",
-          "spanish_detected_second_time": "english_practice",
-          "off_topic_first_time": "off_topic_1",
-          "off_topic_second_time": "off_topic_2",
-          "profanity_detected": "profanity_warning",
-          "empty_answer": "try_again_feedback"
-        },
-        "next": {
-          "afterGoodAnswer": "question_6",
-          "afterNeedsImprovement": "question_5",
-          "afterWarning": "question_5"
-        }
-      },
-      {
-        "id": "question_6",
-        "number": 6,
-        "prompt": "Have you ever worked on a project that required teamwork? Tell me what you have done.",
-        "hint": "Mention one project and briefly explain your role in the team.",
-        "exampleAnswer": "Yes, I worked on a school project. I helped organize the information and present the results.",
-        "expectedAnswerType": "teamwork_experience",
-        "video": {
-          "type": "video",
-          "label": "7_Q6_teamwork.mp4",
-          "subtitle": "Have you ever worked on a project that required teamwork? Tell me what you have done.",
-          "url": "https://res.cloudinary.com/ducmsnybv/video/upload/q_auto/f_auto/v1780373903/7_Q6_teamwork_qxvzrk.mp4"
-        },
-        "studentInput": {
-          "type": "speech_or_text",
-          "placeholder": "Example: Yes, I worked on a school project and helped my team prepare the presentation.",
-          "minWords": 6,
-          "maxWords": 90
-        },
-        "repeat": {
-          "allowed": true,
-          "limit": 3,
-          "onLimitReached": {
-            "type": "banner",
-            "message": "You have reached the repeat limit. Please use Hint or Example Answer if you need support."
-          }
-        },
-        "validationRules": {
-          "detectSpanish": true,
-          "detectProfanity": true,
-          "detectOffTopic": true,
-          "detectEmptyAnswer": true
-        },
-        "feedbackMap": {
-          "good_answer": "awesome_feedback",
-          "needs_improvement": "try_again_feedback",
-          "partial_answer": "try_reading_feedback",
-          "spanish_detected_first_time": "english_warning",
-          "spanish_detected_second_time": "english_practice",
-          "off_topic_first_time": "off_topic_1",
-          "off_topic_second_time": "off_topic_2",
-          "profanity_detected": "profanity_warning",
-          "empty_answer": "try_again_feedback"
-        },
-        "next": {
-          "afterGoodAnswer": "question_7",
-          "afterNeedsImprovement": "question_6",
-          "afterWarning": "question_6"
-        }
-      },
-      {
-        "id": "question_7",
-        "number": 7,
-        "prompt": "What kind of tasks are you capable of doing independently?",
-        "hint": "Mention one or two tasks you can do without much help.",
-        "exampleAnswer": "I am capable of writing reports, organizing files, and using office software independently.",
-        "expectedAnswerType": "independent_tasks",
-        "video": {
-          "type": "video",
-          "label": "8_Q7_tasks.mp4",
-          "subtitle": "What kind of tasks are you capable of doing independently?",
-          "url": "https://res.cloudinary.com/ducmsnybv/video/upload/q_auto/f_auto/v1780372655/8_Q7_tasks_pgtcnv.mp4"
-        },
-        "studentInput": {
-          "type": "speech_or_text",
-          "placeholder": "Example: I can organize documents and prepare simple reports independently.",
-          "minWords": 6,
-          "maxWords": 90
-        },
-        "repeat": {
-          "allowed": true,
-          "limit": 3,
-          "onLimitReached": {
-            "type": "banner",
-            "message": "You have reached the repeat limit. Please use Hint or Example Answer if you need support."
-          }
-        },
-        "validationRules": {
-          "detectSpanish": true,
-          "detectProfanity": true,
-          "detectOffTopic": true,
-          "detectEmptyAnswer": true
-        },
-        "feedbackMap": {
-          "good_answer": "excellent_feedback",
-          "needs_improvement": "try_again_feedback",
-          "partial_answer": "try_reading_feedback",
-          "spanish_detected_first_time": "english_warning",
-          "spanish_detected_second_time": "english_practice",
-          "off_topic_first_time": "off_topic_1",
-          "off_topic_second_time": "off_topic_2",
-          "profanity_detected": "profanity_warning",
-          "empty_answer": "try_again_feedback"
-        },
-        "next": {
-          "afterGoodAnswer": "finish",
-          "afterNeedsImprovement": "question_7",
-          "afterWarning": "question_7"
-        }
-      }
-    ],
-    "optionalQuestionBank": [
-      {
-        "id": "question_8_optional",
-        "number": 8,
-        "prompt": "Tell me about a skill you are currently improving. What are you focused on getting better at?",
-        "hint": "Mention one skill you are practicing or trying to improve.",
-        "exampleAnswer": "I am improving my English speaking skills because I want to communicate better at work.",
-        "video": {
-          "type": "video",
-          "label": "9_Q8_better_at.mp4",
-          "subtitle": "Tell me about a skill you are currently improving. What are you focused on getting better at?",
-          "url": "https://res.cloudinary.com/ducmsnybv/video/upload/q_auto/f_auto/v1780372650/9_Q8_better_at_bxvprl.mp4"
         }
       }
     ],

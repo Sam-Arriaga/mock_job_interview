@@ -7,6 +7,7 @@ let offTopicWarningCount = 0;
 const idleImage = document.getElementById("idleImage");
 const emilyVideo = document.getElementById("emilyVideo");
 emilyVideo.playsInline = true;
+
 const questionText = document.getElementById("questionText");
 const studentAnswer = document.getElementById("studentAnswer");
 const feedbackMessage = document.getElementById("feedbackMessage");
@@ -15,6 +16,7 @@ const captionText = document.getElementById("captionText");
 const systemBanner = document.getElementById("systemBanner");
 const progressLabel = document.getElementById("progressLabel");
 const captionMode = document.getElementById("captionMode");
+
 const speakBtn = document.getElementById("speakBtn");
 const startBtn = document.getElementById("startBtn");
 const repeatBtn = document.getElementById("repeatBtn");
@@ -40,15 +42,15 @@ function loadIdle() {
   feedbackMessage.textContent = "Waiting to start...";
   systemBanner.classList.add("hidden");
   speakBtn.disabled = true;
-  
+
   idleImage.src = interviewData.assets.idle.url;
   idleImage.style.display = "block";
-  emilyVideo.style.display = "none";
   idleImage.classList.remove("hidden");
 
   emilyVideo.pause();
   emilyVideo.removeAttribute("src");
   emilyVideo.load();
+  emilyVideo.style.display = "none";
   emilyVideo.classList.add("hidden");
 }
 
@@ -57,8 +59,8 @@ function startInterview() {
   repeatCount = 0;
   spanishWarningCount = 0;
   offTopicWarningCount = 0;
-  speakBtn.disabled = false;
 
+  speakBtn.disabled = false;
   progressLabel.textContent = "Progress: 1 / 1";
   questionText.textContent = "Introduction";
   studentAnswer.value = "";
@@ -83,23 +85,21 @@ function playAsset(asset, onEndedCallback = null) {
 
   idleImage.style.display = "none";
   emilyVideo.style.display = "block";
+  emilyVideo.classList.remove("hidden");
 
   emilyVideo.pause();
-emilyVideo.src = asset.url;
-emilyVideo.currentTime = 0;
-
-emilyVideo.muted = false;
-emilyVideo.volume = 1;
-
-emilyVideo.load();
+  emilyVideo.src = asset.url;
+  emilyVideo.currentTime = 0;
+  emilyVideo.muted = false;
+  emilyVideo.volume = 1;
+  emilyVideo.playbackRate = slowModeEnabled ? 0.75 : 1;
+  emilyVideo.load();
 
   subtitleBox.textContent = asset.subtitle || "";
   updateCaptions(asset);
 
   emilyVideo.onended = function () {
-    if (onEndedCallback) {
-      onEndedCallback();
-    }
+    if (onEndedCallback) onEndedCallback();
   };
 
   emilyVideo.play().catch(error => {
@@ -108,9 +108,7 @@ emilyVideo.load();
 }
 
 function repeatQuestion() {
-  if (!currentQuestion) return;
-
-  if (!currentQuestion.repeat?.allowed) return;
+  if (!currentQuestion || !currentQuestion.repeat?.allowed) return;
 
   repeatCount++;
 
@@ -126,7 +124,7 @@ function repeatQuestion() {
   playQuestionVideo();
 }
 
-async function submitAnswer() {
+function submitAnswer() {
   if (!currentQuestion) return;
 
   const answer = studentAnswer.value.trim();
@@ -135,83 +133,167 @@ async function submitAnswer() {
   systemBanner.classList.add("hidden");
 
   if (answer.length === 0) {
-    feedbackMessage.textContent = "Please write an answer before submitting.";
-    playFeedback("empty_answer");
+    showFeedback("empty_answer");
     return;
   }
 
   if (containsProfanity(answer)) {
-    feedbackMessage.textContent = "Please use respectful language during the interview.";
-    playFeedback("profanity_detected");
+    showFeedback("profanity_detected");
     return;
   }
 
   if (containsSpanish(answer)) {
     spanishWarningCount++;
 
-    feedbackMessage.textContent = "Please answer in English.";
-
     if (spanishWarningCount === 1) {
-      playFeedback("spanish_detected_first_time");
+      showFeedback("spanish_detected_first_time", "spanish_detected");
     } else {
-      playFeedback("spanish_detected_second_time");
+      showFeedback("spanish_detected_second_time", "spanish_detected");
     }
 
     return;
   }
-/*
-  if (isOffTopic(answer)) {
-    offTopicWarningCount++;
 
-    feedbackMessage.textContent = "Please focus on the job position.";
-
-    if (offTopicWarningCount === 1) {
-      playFeedback("off_topic_first_time");
-    } else {
-      playFeedback("off_topic_second_time");
-    }
-
+  if (wordCount < currentQuestion.studentInput.minWords) {
+    showFeedback("too_short");
     return;
   }
-*/
-if (wordCount < 3) {
-  feedbackMessage.textContent = "Good start. Please write a little more so Emily can help you.";
-  return;
+
+  if (isGoodAnswer(answer)) {
+    showFeedback("good_answer");
+    return;
+  }
+
+  if (isPartialAnswer(answer)) {
+    showFeedback("partial_answer");
+    return;
+  }
+
+  showFeedback("needs_improvement");
 }
 
-  feedbackMessage.textContent = "Emily is analyzing your answer...";
+function showFeedback(feedbackKey, textKey = null) {
+  const messageKey = textKey || feedbackKey;
 
-  try {
-    const response = await fetch("http://localhost:3000/feedback", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        question: currentQuestion.prompt,
-        answer: answer
-      })
-    });
+  feedbackMessage.textContent =
+    currentQuestion.feedbackText?.[messageKey] ||
+    "Please try again.";
 
-    const data = await response.json();
-
-    feedbackMessage.textContent = data.feedback;
-    playFeedback("good_answer");
-
-    } catch (error) {
-    console.error(error);
-    feedbackMessage.textContent =
-      "Emily API is not available. Please check if the server is running.";
-  }
+  playFeedback(feedbackKey);
 }
 
 function playFeedback(feedbackKey) {
-  const assetKey = currentQuestion.feedbackMap[feedbackKey];
-  const asset = interviewData.assets[assetKey];
+  const assetKey = currentQuestion.feedbackMap?.[feedbackKey];
+  const asset = interviewData.assets?.[assetKey];
 
-  if (!asset) return;
+  if (!asset) {
+    console.warn("Missing feedback asset:", feedbackKey);
+    return;
+  }
 
   playAsset(asset);
+}
+
+function isGoodAnswer(text) {
+  const lowerText = normalizeText(text);
+
+  const hasPattern = currentQuestion.acceptablePatterns?.some(pattern =>
+    lowerText.includes(pattern)
+  );
+
+  const hasKeyword = currentQuestion.keywords?.some(keyword =>
+    lowerText.includes(keyword.toLowerCase())
+  );
+
+  return hasPattern && hasKeyword;
+}
+
+function isPartialAnswer(text) {
+  const lowerText = normalizeText(text);
+
+  const hasKeyword = currentQuestion.keywords?.some(keyword =>
+    lowerText.includes(keyword.toLowerCase())
+  );
+
+  const hasSomeStructure =
+    lowerText.includes("interested") ||
+    lowerText.includes("work") ||
+    lowerText.includes("job") ||
+    lowerText.includes("position");
+
+  return hasKeyword || hasSomeStructure;
+}
+
+function normalizeText(text) {
+  return text
+    .toLowerCase()
+    .replace(/[.,!?;:]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function containsSpanish(text) {
+  const spanishWords = [
+    "quiero",
+    "trabajo",
+    "puesto",
+    "porque",
+    "necesito",
+    "me interesa",
+    "estoy interesado",
+    "estoy interesada",
+    "empresa",
+    "gracias",
+    "hola",
+    "sí",
+    "para",
+    "abogado",
+    "contador",
+    "administrador"
+  ];
+
+  const lowerText = text.toLowerCase();
+
+  return spanishWords.some(word => lowerText.includes(word));
+}
+
+function containsProfanity(text) {
+  const bannedWords =
+    interviewData.globalValidation?.profanityList || [
+      "fuck",
+      "fucking",
+      "shit",
+      "bitch",
+      "asshole",
+      "damn"
+    ];
+
+  const lowerText = text.toLowerCase();
+
+  return bannedWords.some(word => lowerText.includes(word));
+}
+
+function showHint() {
+  if (!currentQuestion) return;
+
+  feedbackMessage.textContent =
+    currentQuestion.feedbackText?.hint_requested ||
+    currentQuestion.hint ||
+    "Use a complete sentence.";
+
+  playFeedback("hint_requested");
+}
+
+function showModelAnswer() {
+  if (!currentQuestion) return;
+
+  const model =
+    currentQuestion.modelAnswers?.[0] ||
+    currentQuestion.exampleAnswer ||
+    "I am interested in working as a legal advisor.";
+
+  feedbackMessage.textContent = `Model answer: "${model}"`;
+  playFeedback("modeling_requested");
 }
 
 function nextStep() {
@@ -229,6 +311,7 @@ function updateCaptions(asset = null) {
   if (!captionMode) return;
 
   const mode = captionMode.value;
+
   const activeSubtitle =
     asset?.subtitle ||
     currentQuestion?.video?.subtitle ||
@@ -244,38 +327,6 @@ function updateCaptions(asset = null) {
   }
 }
 
-function containsSpanish(text) {
-  const spanishWords = [
-    "quiero", "trabajo", "puesto", "porque", "necesito", "me interesa",
-    "estoy interesado", "empresa", "gracias", "hola", "sí", "para"
-  ];
-
-  const lowerText = text.toLowerCase();
-
-  return spanishWords.some(word => lowerText.includes(word));
-}
-
-function containsProfanity(text) {
-  const bannedWords = [
-    "fuck", "shit", "bitch", "asshole", "damn"
-  ];
-
-  const lowerText = text.toLowerCase();
-
-  return bannedWords.some(word => lowerText.includes(word));
-}
-
-function isOffTopic(text) {
-  const lowerText = text.toLowerCase();
-
-  const jobWords = [
-    "position", "job", "role", "assistant", "manager", "teacher",
-    "consultant", "developer", "engineer", "sales", "marketing",
-    "finance", "intern", "trainee", "recruitment"
-  ];
-
-  return !jobWords.some(word => lowerText.includes(word));
-}
 const SpeechRecognition =
   window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -295,10 +346,9 @@ if (!SpeechRecognition) {
     recognition.start();
   });
 
-  recognition.onresult = (event) => {
-  const spokenText = event.results[0][0].transcript;
-
-  studentAnswer.value += " " + spokenText;
+  recognition.onresult = event => {
+    const spokenText = event.results[0][0].transcript;
+    studentAnswer.value += " " + spokenText;
     feedbackMessage.textContent = "Speech captured. You can submit your answer.";
     speakBtn.textContent = "🎙 Speak Now";
   };
@@ -313,10 +363,54 @@ if (!SpeechRecognition) {
     speakBtn.textContent = "🎙 Speak Now";
   };
 }
+
 startBtn.addEventListener("click", startInterview);
 repeatBtn.addEventListener("click", repeatQuestion);
 submitBtn.addEventListener("click", submitAnswer);
 nextBtn.addEventListener("click", nextStep);
+
 captionMode.addEventListener("change", function () {
   updateCaptions();
+});
+
+// =========================
+// MENU BUTTONS
+// =========================
+
+const clearBtn = document.getElementById("clearBtn");
+const hintBtn = document.getElementById("hintBtn");
+const modelAnswerBtn = document.getElementById("modelAnswerBtn");
+const slowModeBtn = document.getElementById("slowModeBtn");
+
+let slowModeEnabled = false;
+
+// CLEAR
+clearBtn.addEventListener("click", () => {
+  studentAnswer.value = "";
+  feedbackMessage.textContent = "Answer area cleared.";
+});
+
+// HINT
+hintBtn.addEventListener("click", () => {
+  showHint();
+});
+
+// MODEL ANSWER
+modelAnswerBtn.addEventListener("click", () => {
+  showModelAnswer();
+});
+
+// SLOW MODE
+slowModeBtn.addEventListener("click", () => {
+  slowModeEnabled = !slowModeEnabled;
+
+  if (slowModeEnabled) {
+    emilyVideo.playbackRate = 0.75;
+    feedbackMessage.textContent = "Slow mode activated.";
+    slowModeBtn.textContent = "Slow mode ON";
+  } else {
+    emilyVideo.playbackRate = 1;
+    feedbackMessage.textContent = "Slow mode deactivated.";
+    slowModeBtn.textContent = "Slow mode";
+  }
 });
