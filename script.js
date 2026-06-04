@@ -3,25 +3,29 @@ let currentQuestion = null;
 let repeatCount = 0;
 let spanishWarningCount = 0;
 let offTopicWarningCount = 0;
+let slowModeEnabled = false;
+let protectedFeedback = false;
 
 const idleImage = document.getElementById("idleImage");
 const emilyVideo = document.getElementById("emilyVideo");
-emilyVideo.playsInline = true;
-
-const questionText = document.getElementById("questionText");
 const studentAnswer = document.getElementById("studentAnswer");
-const feedbackMessage = document.getElementById("feedbackMessage");
-const subtitleBox = document.getElementById("subtitleBox");
-const captionText = document.getElementById("captionText");
-const systemBanner = document.getElementById("systemBanner");
-const progressLabel = document.getElementById("progressLabel");
-const captionMode = document.getElementById("captionMode");
+const feedbackMessage = document.getElementById("feedbackBox");
 
 const speakBtn = document.getElementById("speakBtn");
-const startBtn = document.getElementById("startBtn");
 const repeatBtn = document.getElementById("repeatBtn");
 const submitBtn = document.getElementById("submitBtn");
 const nextBtn = document.getElementById("nextBtn");
+const clearBtn = document.getElementById("clearBtn");
+
+const menuBtn = document.getElementById("menuBtn");
+const closeMenuBtn = document.getElementById("closeMenuBtn");
+const menuOverlay = document.getElementById("menuOverlay");
+
+const hintBtn = document.getElementById("hintBtn");
+const modelAnswerBtn = document.getElementById("modelAnswerBtn");
+const slowModeBtn = document.getElementById("slowModeBtn");
+
+emilyVideo.playsInline = true;
 
 fetch("interview-flow.json")
   .then(response => response.json())
@@ -31,17 +35,16 @@ fetch("interview-flow.json")
   })
   .catch(error => {
     console.error("JSON loading error:", error);
-    questionText.textContent = "Error loading interview.";
+    feedbackMessage.textContent = "Error loading interview.";
   });
 
 function loadIdle() {
-  progressLabel.textContent = "Progress: 0 / 1";
-  questionText.textContent = "Welcome to Emily's Interview Coach";
-  subtitleBox.textContent = "Click Start Interview when you are ready.";
-  captionText.textContent = "Emily will ask you one short job interview question.";
-  feedbackMessage.textContent = "Waiting to start...";
-  systemBanner.classList.add("hidden");
-  speakBtn.disabled = true;
+  currentQuestion = null;
+  protectedFeedback = false;
+
+  feedbackMessage.textContent = "Click ➡️ to start when you are ready.";
+
+  if (speakBtn) speakBtn.disabled = true;
 
   idleImage.src = interviewData.assets.idle.url;
   idleImage.style.display = "block";
@@ -52,6 +55,9 @@ function loadIdle() {
   emilyVideo.load();
   emilyVideo.style.display = "none";
   emilyVideo.classList.add("hidden");
+
+  nextBtn.querySelector("span").textContent = "Start";
+  setActiveAction("nextBtn");
 }
 
 function startInterview() {
@@ -59,31 +65,48 @@ function startInterview() {
   repeatCount = 0;
   spanishWarningCount = 0;
   offTopicWarningCount = 0;
+  protectedFeedback = false;
 
-  speakBtn.disabled = false;
-  progressLabel.textContent = "Progress: 1 / 1";
-  questionText.textContent = "Introduction";
+  if (speakBtn) speakBtn.disabled = false;
+
   studentAnswer.value = "";
   feedbackMessage.textContent = "Listen to Emily first.";
-  systemBanner.classList.add("hidden");
 
   playAsset(interviewData.assets.intro, function () {
     playQuestionVideo();
   });
+
+  nextBtn.querySelector("span").textContent = "Next";
 }
 
 function playQuestionVideo() {
   if (!currentQuestion) return;
 
-  questionText.textContent = currentQuestion.prompt;
-  feedbackMessage.textContent = "Waiting for your answer...";
+  protectedFeedback = false;
+  feedbackMessage.textContent = currentQuestion.prompt;
+
   playAsset(currentQuestion.video);
+
+  setActiveAction("submitBtn");
+}
+
+function setActiveAction(buttonId) {
+  document.querySelectorAll(".action-btn").forEach(btn => {
+    btn.classList.remove("active-action");
+  });
+
+  const activeBtn = document.getElementById(buttonId);
+  if (activeBtn) {
+    activeBtn.classList.add("active-action");
+  }
 }
 
 function playAsset(asset, onEndedCallback = null) {
   if (!asset || !asset.url) return;
 
   idleImage.style.display = "none";
+  idleImage.classList.add("hidden");
+
   emilyVideo.style.display = "block";
   emilyVideo.classList.remove("hidden");
 
@@ -94,9 +117,6 @@ function playAsset(asset, onEndedCallback = null) {
   emilyVideo.volume = 1;
   emilyVideo.playbackRate = slowModeEnabled ? 0.75 : 1;
   emilyVideo.load();
-
-  subtitleBox.textContent = asset.subtitle || "";
-  updateCaptions(asset);
 
   emilyVideo.onended = function () {
     if (onEndedCallback) onEndedCallback();
@@ -113,14 +133,12 @@ function repeatQuestion() {
   repeatCount++;
 
   if (repeatCount > currentQuestion.repeat.limit) {
-    systemBanner.textContent =
+    feedbackMessage.textContent =
       currentQuestion.repeat.onLimitReached?.message ||
       "You have reached the repeat limit for this question.";
-    systemBanner.classList.remove("hidden");
     return;
   }
 
-  systemBanner.classList.add("hidden");
   playQuestionVideo();
 }
 
@@ -129,8 +147,6 @@ function submitAnswer() {
 
   const answer = studentAnswer.value.trim();
   const wordCount = answer.split(/\s+/).filter(Boolean).length;
-
-  systemBanner.classList.add("hidden");
 
   if (answer.length === 0) {
     showFeedback("empty_answer");
@@ -179,7 +195,22 @@ function showFeedback(feedbackKey, textKey = null) {
     currentQuestion.feedbackText?.[messageKey] ||
     "Please try again.";
 
+  protectedFeedback = feedbackKey === "partial_answer";
+
+  if (feedbackKey === "partial_answer") {
+    studentAnswer.value = "";
+  }
+
   playFeedback(feedbackKey);
+
+  if (
+    feedbackKey === "good_answer" ||
+    feedbackKey === "excellent_answer"
+  ) {
+    setTimeout(() => {
+      nextStep();
+    }, 3500);
+  }
 }
 
 function playFeedback(feedbackKey) {
@@ -253,7 +284,6 @@ function containsSpanish(text) {
   ];
 
   const lowerText = text.toLowerCase();
-
   return spanishWords.some(word => lowerText.includes(word));
 }
 
@@ -269,7 +299,6 @@ function containsProfanity(text) {
     ];
 
   const lowerText = text.toLowerCase();
-
   return bannedWords.some(word => lowerText.includes(word));
 }
 
@@ -281,6 +310,7 @@ function showHint() {
     currentQuestion.hint ||
     "Use a complete sentence.";
 
+  protectedFeedback = true;
   playFeedback("hint_requested");
 }
 
@@ -293,39 +323,23 @@ function showModelAnswer() {
     "I am interested in working as a legal advisor.";
 
   feedbackMessage.textContent = `Model answer: "${model}"`;
+  protectedFeedback = true;
+  studentAnswer.value = "";
+
   playFeedback("modeling_requested");
 }
 
 function nextStep() {
-  questionText.textContent = "Interview finished";
-  feedbackMessage.textContent = "Session complete.";
-  captionText.textContent = "You completed the first interview question.";
-  systemBanner.classList.add("hidden");
+  feedbackMessage.textContent = "Interview finished. Great job!";
+
+  setActiveAction("nextBtn");
 
   playAsset(interviewData.assets.finish, function () {
     loadIdle();
   });
 }
 
-function updateCaptions(asset = null) {
-  if (!captionMode) return;
-
-  const mode = captionMode.value;
-
-  const activeSubtitle =
-    asset?.subtitle ||
-    currentQuestion?.video?.subtitle ||
-    currentQuestion?.prompt ||
-    "";
-
-  if (mode === "none") {
-    captionText.textContent = "";
-  } else if (mode === "key") {
-    captionText.textContent = currentQuestion?.prompt || activeSubtitle;
-  } else if (mode === "full") {
-    captionText.textContent = activeSubtitle;
-  }
-}
+/* SPEECH RECOGNITION */
 
 const SpeechRecognition =
   window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -341,7 +355,10 @@ if (!SpeechRecognition) {
   recognition.continuous = false;
 
   speakBtn.addEventListener("click", () => {
-    feedbackMessage.textContent = "Listening... please speak now.";
+    if (!protectedFeedback) {
+      feedbackMessage.textContent = "Emily is listening...";
+    }
+
     speakBtn.textContent = "🎙 Listening...";
     recognition.start();
   });
@@ -349,58 +366,66 @@ if (!SpeechRecognition) {
   recognition.onresult = event => {
     const spokenText = event.results[0][0].transcript;
     studentAnswer.value += " " + spokenText;
-    feedbackMessage.textContent = "Speech captured. You can submit your answer.";
-    speakBtn.textContent = "🎙 Speak Now";
+
+    if (!protectedFeedback) {
+      feedbackMessage.textContent = "Speech captured. You can submit your answer.";
+    }
+
+    speakBtn.textContent = "🎤 Speak";
   };
 
   recognition.onerror = () => {
     feedbackMessage.textContent =
       "Microphone problem. You can type your answer instead.";
-    speakBtn.textContent = "🎙 Speak Now";
+    speakBtn.textContent = "🎤 Speak";
   };
 
   recognition.onend = () => {
-    speakBtn.textContent = "🎙 Speak Now";
+    speakBtn.textContent = "🎤 Speak";
   };
 }
 
-startBtn.addEventListener("click", startInterview);
-repeatBtn.addEventListener("click", repeatQuestion);
-submitBtn.addEventListener("click", submitAnswer);
-nextBtn.addEventListener("click", nextStep);
+/* MAIN BUTTONS */
 
-captionMode.addEventListener("change", function () {
-  updateCaptions();
+nextBtn.addEventListener("click", () => {
+  startInterview();
 });
 
-// =========================
-// MENU BUTTONS
-// =========================
+repeatBtn.addEventListener("click", repeatQuestion);
+submitBtn.addEventListener("click", submitAnswer);
 
-const clearBtn = document.getElementById("clearBtn");
-const hintBtn = document.getElementById("hintBtn");
-const modelAnswerBtn = document.getElementById("modelAnswerBtn");
-const slowModeBtn = document.getElementById("slowModeBtn");
-
-let slowModeEnabled = false;
-
-// CLEAR
 clearBtn.addEventListener("click", () => {
   studentAnswer.value = "";
+  protectedFeedback = false;
   feedbackMessage.textContent = "Answer area cleared.";
 });
 
-// HINT
+/* MENU */
+
+menuBtn.addEventListener("click", () => {
+  menuOverlay.classList.remove("hidden");
+});
+
+closeMenuBtn.addEventListener("click", () => {
+  menuOverlay.classList.add("hidden");
+});
+
+menuOverlay.addEventListener("click", event => {
+  if (event.target === menuOverlay) {
+    menuOverlay.classList.add("hidden");
+  }
+});
+
 hintBtn.addEventListener("click", () => {
   showHint();
+  menuOverlay.classList.add("hidden");
 });
 
-// MODEL ANSWER
 modelAnswerBtn.addEventListener("click", () => {
   showModelAnswer();
+  menuOverlay.classList.add("hidden");
 });
 
-// SLOW MODE
 slowModeBtn.addEventListener("click", () => {
   slowModeEnabled = !slowModeEnabled;
 

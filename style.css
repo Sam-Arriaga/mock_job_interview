@@ -235,6 +235,11 @@ button {
   color: white;
 }
 
+.action-btn.active-action {
+  background: var(--blue);
+  color: white;
+}
+
 .action-btn:active {
   transform: scale(0.97);
 }
@@ -402,20 +407,14 @@ button {
   }
 
   .video-card {
-  max-height: 46dvh;
-}
-
-.app-logo {
-  display: block;
-}
-
-.answer-input {
-  height: 64px;
-}
-
-@media (min-width: 768px) {
-  .video-card {
     max-height: 42dvh;
   }
-}
+
+  .app-logo {
+    display: block;
+  }
+
+  .answer-input {
+    height: 64px;
+  }
 }
