@@ -36,34 +36,42 @@
         </div>
       </section>
 
-      <section class="video-area">
-        <div class="video-card">
-          <img
-            id="idleImage"
-            class="coach-media"
-            src=""
-            alt="Emily waiting"
-          />
-
-          <video
-            id="emilyVideo"
-            class="coach-media hidden"
-            playsinline
-            preload="auto"
-            disablePictureInPicture>
-          </video>
-        </div>
+      <section
+        id="feedbackBox"
+        class="upper-text-area"
+        aria-live="polite"
+      >
+        Ready to begin?
       </section>
 
-      <section id="feedbackBox" class="feedback-box" aria-live="polite">
-        Click ➡️ to start when you are ready.
-      </section>
+      <section class="interview-content" aria-label="AI interview area">
 
-      <section class="answer-area">
-        <textarea
-          id="studentAnswer"
-          class="answer-input"
-          placeholder="Type your answer here if needed…"></textarea>
+        <section class="video-area">
+          <div class="video-card">
+            <img
+              id="idleImage"
+              class="coach-media"
+              src=""
+              alt="Emily waiting"
+            />
+
+            <video
+              id="emilyVideo"
+              class="coach-media hidden"
+              playsinline
+              preload="auto"
+              disablePictureInPicture>
+            </video>
+          </div>
+        </section>
+
+        <section class="answer-area">
+          <textarea
+            id="studentAnswer"
+            class="answer-input"
+            placeholder="Type your answer here if needed…"></textarea>
+        </section>
+
       </section>
 
     </main>

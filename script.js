@@ -1,8 +1,8 @@
 let interviewData = null;
 let currentQuestion = null;
 let repeatCount = 0;
-let spanishWarningCount = 0;
-let offTopicWarningCount = 0;
+let spanishWarningCount = 0; // Legacy counter kept for backward compatibility.
+let offTopicWarningCount = 0; // Legacy counter kept for backward compatibility.
 let slowModeEnabled = false;
 let protectedFeedback = false;
 
@@ -11,6 +11,7 @@ const emilyVideo = document.getElementById("emilyVideo");
 const studentAnswer = document.getElementById("studentAnswer");
 const feedbackMessage = document.getElementById("feedbackBox");
 
+const backBtn = document.getElementById("backBtn");
 const speakBtn = document.getElementById("speakBtn");
 const repeatBtn = document.getElementById("repeatBtn");
 const submitBtn = document.getElementById("submitBtn");
@@ -27,6 +28,427 @@ const slowModeBtn = document.getElementById("slowModeBtn");
 
 emilyVideo.playsInline = true;
 
+const interviewUIState = {
+  phase: "before",
+  hasSubmittedCurrentAnswer: false,
+  isListening: false,
+  finalReached: false
+};
+
+function setButtonLabel(button, label) {
+  if (!button) return;
+
+  const span = button.querySelector("span");
+
+  if (span) {
+    span.textContent = label;
+  }
+}
+
+function setButtonState(button, {
+  disabled = false,
+  primary = false,
+  speakingPrimary = false,
+  inactive = false
+} = {}) {
+  if (!button) return;
+
+  button.disabled = disabled;
+  button.classList.toggle("is-primary", primary);
+  button.classList.toggle("is-speaking-primary", speakingPrimary);
+  button.classList.toggle("is-inactive", inactive);
+}
+
+function updateInterviewButtons(phase = "before") {
+  interviewUIState.phase = phase;
+
+  [backBtn, clearBtn, speakBtn, submitBtn, nextBtn].forEach(btn => {
+    if (!btn) return;
+
+    btn.classList.remove(
+      "is-primary",
+      "is-speaking-primary",
+      "is-inactive",
+      "active-action",
+      "is-listening"
+    );
+
+    btn.disabled = false;
+  });
+
+  if (phase === "before") {
+    setButtonState(nextBtn, { primary: true });
+    setButtonState(speakBtn, { disabled: true, inactive: true });
+    setButtonState(backBtn, { disabled: true, inactive: true });
+    setButtonState(submitBtn, { disabled: true, inactive: true });
+    setButtonState(clearBtn, { inactive: true });
+
+    setButtonLabel(nextBtn, "Start");
+    setButtonLabel(speakBtn, "Speak");
+  }
+
+  if (phase === "progress") {
+    setButtonState(speakBtn, { speakingPrimary: true });
+    setButtonState(submitBtn, {});
+    setButtonState(backBtn, {});
+    setButtonState(clearBtn, {});
+    setButtonState(nextBtn, { disabled: true, inactive: true });
+
+    setButtonLabel(nextBtn, "Start");
+    setButtonLabel(speakBtn, "Speak");
+  }
+
+  if (phase === "final") {
+    setButtonState(nextBtn, { primary: true });
+    setButtonState(speakBtn, { speakingPrimary: true });
+    setButtonState(submitBtn, { disabled: true, inactive: true });
+    setButtonState(backBtn, {});
+    setButtonState(clearBtn, {});
+
+    setButtonLabel(nextBtn, "Finish");
+    setButtonLabel(speakBtn, "Speak");
+
+    interviewUIState.finalReached = true;
+  }
+}
+
+function setListeningVisualState(isListening) {
+  interviewUIState.isListening = isListening;
+
+  if (!speakBtn) return;
+
+  speakBtn.classList.toggle("is-listening", isListening);
+  speakBtn.classList.toggle("active-action", isListening);
+
+  setButtonLabel(speakBtn, isListening ? "Listening..." : "Speak");
+}
+
+function markAnswerSubmitted() {
+  interviewUIState.hasSubmittedCurrentAnswer = true;
+}
+
+function resetAnswerSubmissionState() {
+  interviewUIState.hasSubmittedCurrentAnswer = false;
+}
+
+function setFeedbackText(text) {
+  if (!feedbackMessage) return;
+
+  feedbackMessage.classList.add("fade-out");
+
+  setTimeout(() => {
+    feedbackMessage.textContent = text;
+    feedbackMessage.classList.remove("fade-out");
+    feedbackMessage.classList.add("fade-in");
+
+    setTimeout(() => {
+      feedbackMessage.classList.remove("fade-in");
+    }, 240);
+  }, 120);
+}
+
+function clearTranscriptBeforeNewSpeech() {
+  if (!studentAnswer) return;
+
+  studentAnswer.classList.add("fade-out");
+
+  setTimeout(() => {
+    studentAnswer.value = "";
+    studentAnswer.classList.remove("fade-out");
+    studentAnswer.classList.add("fade-in");
+
+    setTimeout(() => {
+      studentAnswer.classList.remove("fade-in");
+    }, 220);
+  }, 180);
+}
+
+/* =========================================================
+   CONVERSATIONAL BEHAVIOR ENGINE
+   Temporary overlays only.
+   Does NOT overwrite hints, captions, modeling answers, or question data.
+========================================================= */
+
+const behaviorState = {
+  profanityWarningCount: 0,
+  spanishWarningCount: 0,
+  mediumOffTopicCount: 0,
+  strongOffTopicCount: 0,
+  terminated: false
+};
+
+const BehaviorEngine = (() => {
+  const TERMINATION_MESSAGE =
+    "Alright, I am stopping the interview here. This session is officially over.";
+
+  const severeHarassmentPatterns = [
+    "i hate you",
+    "kill yourself",
+    "shut up bitch",
+    "fuck you",
+    "stupid bitch"
+  ];
+
+  const mildProfanityPatterns = [
+    "fuck",
+    "fucking",
+    "shit",
+    "damn",
+    "asshole",
+    "bitch"
+  ];
+
+  const spanishPatterns = [
+    "quiero",
+    "trabajo",
+    "puesto",
+    "porque",
+    "necesito",
+    "me interesa",
+    "estoy interesado",
+    "estoy interesada",
+    "empresa",
+    "gracias",
+    "hola",
+    "sí",
+    "para",
+    "abogado",
+    "contador",
+    "administrador"
+  ];
+
+  const strongOffTopicPatterns = [
+    "i do not care",
+    "this is stupid",
+    "i hate this interview",
+    "i don't want to answer",
+    "leave me alone"
+  ];
+
+  const mediumOffTopicPatterns = [
+    "what is your name",
+    "are you real",
+    "do you have a boyfriend",
+    "sing a song",
+    "tell me a joke",
+    "let's talk about something else"
+  ];
+
+  function reset() {
+    behaviorState.profanityWarningCount = 0;
+    behaviorState.spanishWarningCount = 0;
+    behaviorState.mediumOffTopicCount = 0;
+    behaviorState.strongOffTopicCount = 0;
+    behaviorState.terminated = false;
+  }
+
+  function normalize(input) {
+    return String(input || "")
+      .toLowerCase()
+      .replace(/[.,!?;:]/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function includesAny(text, patterns) {
+    return patterns.some(pattern => text.includes(pattern));
+  }
+
+  function createResult({
+    handled = false,
+    severity = "none",
+    message = "",
+    terminate = false
+  } = {}) {
+    return {
+      handled,
+      severity,
+      message,
+      terminate,
+      shouldAdvance: false,
+      shouldClearAnswer: false
+    };
+  }
+
+  function analyze(answer, question) {
+    const text = normalize(answer);
+
+    if (!text) {
+      return createResult({ handled: false });
+    }
+
+    if (includesAny(text, severeHarassmentPatterns)) {
+      behaviorState.terminated = true;
+
+      return createResult({
+        handled: true,
+        severity: "termination",
+        message: TERMINATION_MESSAGE,
+        terminate: true
+      });
+    }
+
+    if (includesAny(text, mildProfanityPatterns)) {
+      behaviorState.profanityWarningCount++;
+
+      if (behaviorState.profanityWarningCount >= 3) {
+        behaviorState.terminated = true;
+
+        return createResult({
+          handled: true,
+          severity: "termination",
+          message: TERMINATION_MESSAGE,
+          terminate: true
+        });
+      }
+
+      return createResult({
+        handled: true,
+        severity: "mild_profanity",
+        message:
+          behaviorState.profanityWarningCount === 1
+            ? "Please keep your language professional. Let’s continue with the interview question."
+            : "This is your second language warning. Please answer respectfully and professionally."
+      });
+    }
+
+    if (includesAny(text, spanishPatterns)) {
+      behaviorState.spanishWarningCount++;
+
+      if (behaviorState.spanishWarningCount >= 3) {
+        return createResult({
+          handled: true,
+          severity: "spanish_strong",
+          message:
+            "Please answer in English. This is an English interview practice. Try again using a short complete sentence."
+        });
+      }
+
+      return createResult({
+        handled: true,
+        severity:
+          behaviorState.spanishWarningCount === 1
+            ? "spanish_soft"
+            : "spanish_medium",
+        message:
+          behaviorState.spanishWarningCount === 1
+            ? "Good effort, but please answer in English. Try again with a simple sentence."
+            : "Please stay in English. You can use the Hint or Modeling Answer if you need support."
+      });
+    }
+
+    if (includesAny(text, strongOffTopicPatterns)) {
+      behaviorState.strongOffTopicCount++;
+
+      if (behaviorState.strongOffTopicCount >= 4) {
+        behaviorState.terminated = true;
+
+        return createResult({
+          handled: true,
+          severity: "termination",
+          message: TERMINATION_MESSAGE,
+          terminate: true
+        });
+      }
+
+      return createResult({
+        handled: true,
+        severity: "strong_off_topic",
+        message:
+          "Let’s stay focused. This is an interview practice. Please answer the current question professionally."
+      });
+    }
+
+    if (includesAny(text, mediumOffTopicPatterns)) {
+      behaviorState.mediumOffTopicCount++;
+
+      return createResult({
+        handled: true,
+        severity: "medium_off_topic",
+        message:
+          behaviorState.mediumOffTopicCount >= 2
+            ? "Please return to the interview question. Your answer should focus on your professional experience or goals."
+            : "That is not part of the interview. Please answer the current question."
+      });
+    }
+
+    if (isSoftOffTopic(text, question)) {
+      return createResult({
+        handled: true,
+        severity: "soft_off_topic",
+        message:
+          "Try to connect your answer to the interview question. Give a short professional answer."
+      });
+    }
+
+    return createResult({ handled: false });
+  }
+
+  function isSoftOffTopic(text, question) {
+    if (!question) return false;
+
+    const professionalSignals = [
+      "job",
+      "work",
+      "study",
+      "career",
+      "experience",
+      "skills",
+      "team",
+      "responsible",
+      "interested",
+      "position",
+      "company"
+    ];
+
+    const hasProfessionalSignal = professionalSignals.some(signal =>
+      text.includes(signal)
+    );
+
+    const hasQuestionKeyword = question.keywords?.some(keyword =>
+      text.includes(keyword.toLowerCase())
+    );
+
+    return !hasProfessionalSignal && !hasQuestionKeyword && text.split(" ").length >= 5;
+  }
+
+  function applyResult(result) {
+    if (!result || !result.handled) return false;
+
+    protectedFeedback = true;
+    setFeedbackText(result.message);
+    setListeningVisualState(false);
+
+    if (result.terminate) {
+      terminateInterviewByBehavior();
+    }
+
+    return true;
+  }
+
+  return {
+    reset,
+    analyze,
+    applyResult
+  };
+})();
+
+function terminateInterviewByBehavior() {
+  behaviorState.terminated = true;
+  currentQuestion = null;
+  studentAnswer.value = "";
+
+  updateInterviewButtons("final");
+
+  if (interviewData?.assets?.finish) {
+    playAsset(interviewData.assets.finish);
+  }
+}
+
+/* =========================================================
+   MAIN INTERVIEW FLOW
+========================================================= */
+
 fetch("interview-flow.json")
   .then(response => response.json())
   .then(data => {
@@ -35,16 +457,19 @@ fetch("interview-flow.json")
   })
   .catch(error => {
     console.error("JSON loading error:", error);
-    feedbackMessage.textContent = "Error loading interview.";
+    setFeedbackText("Error loading interview.");
   });
 
 function loadIdle() {
   currentQuestion = null;
   protectedFeedback = false;
+  repeatCount = 0;
+  spanishWarningCount = 0;
+  offTopicWarningCount = 0;
+  BehaviorEngine.reset();
 
-  feedbackMessage.textContent = "Click ➡️ to start when you are ready.";
-
-  if (speakBtn) speakBtn.disabled = true;
+  studentAnswer.value = "";
+  setFeedbackText("Ready to begin?");
 
   idleImage.src = interviewData.assets.idle.url;
   idleImage.style.display = "block";
@@ -56,49 +481,61 @@ function loadIdle() {
   emilyVideo.style.display = "none";
   emilyVideo.classList.add("hidden");
 
-  nextBtn.querySelector("span").textContent = "Start";
-  setActiveAction("nextBtn");
+  resetInterviewUIState();
+}
+
+function resetInterviewUIState() {
+  interviewUIState.phase = "before";
+  interviewUIState.hasSubmittedCurrentAnswer = false;
+  interviewUIState.isListening = false;
+  interviewUIState.finalReached = false;
+
+  updateInterviewButtons("before");
 }
 
 function startInterview() {
+  if (!interviewData) return;
+
   currentQuestion = interviewData.interview.questions[0];
   repeatCount = 0;
   spanishWarningCount = 0;
   offTopicWarningCount = 0;
   protectedFeedback = false;
-
-  if (speakBtn) speakBtn.disabled = false;
+  BehaviorEngine.reset();
 
   studentAnswer.value = "";
-  feedbackMessage.textContent = "Listen to Emily first.";
+  setFeedbackText("Meet Emily");
+
+  updateInterviewButtons("progress");
 
   playAsset(interviewData.assets.intro, function () {
     playQuestionVideo();
   });
-
-  nextBtn.querySelector("span").textContent = "Next";
 }
 
 function playQuestionVideo() {
   if (!currentQuestion) return;
 
   protectedFeedback = false;
-  feedbackMessage.textContent = currentQuestion.prompt;
+  resetAnswerSubmissionState();
+
+  setFeedbackText(getQuestionGuideText(currentQuestion));
 
   playAsset(currentQuestion.video);
-
-  setActiveAction("submitBtn");
 }
 
-function setActiveAction(buttonId) {
-  document.querySelectorAll(".action-btn").forEach(btn => {
-    btn.classList.remove("active-action");
-  });
+function getQuestionGuideText(question) {
+  const guides = {
+    question_1: "Desired job position",
+    question_2: "Academic background",
+    question_3: "Responsibilities and experience",
+    question_4: "Activities outside work",
+    question_5: "Your strengths",
+    question_6: "Teamwork experience",
+    question_7: "Independent work"
+  };
 
-  const activeBtn = document.getElementById(buttonId);
-  if (activeBtn) {
-    activeBtn.classList.add("active-action");
-  }
+  return guides[question.id] || question.prompt || "Your answer";
 }
 
 function playAsset(asset, onEndedCallback = null) {
@@ -119,7 +556,9 @@ function playAsset(asset, onEndedCallback = null) {
   emilyVideo.load();
 
   emilyVideo.onended = function () {
-    if (onEndedCallback) onEndedCallback();
+    if (typeof onEndedCallback === "function") {
+      onEndedCallback();
+    }
   };
 
   emilyVideo.play().catch(error => {
@@ -133,9 +572,10 @@ function repeatQuestion() {
   repeatCount++;
 
   if (repeatCount > currentQuestion.repeat.limit) {
-    feedbackMessage.textContent =
+    setFeedbackText(
       currentQuestion.repeat.onLimitReached?.message ||
-      "You have reached the repeat limit for this question.";
+      "You have reached the repeat limit. Please use Hint or Modeling Answer if you need support."
+    );
     return;
   }
 
@@ -143,7 +583,16 @@ function repeatQuestion() {
 }
 
 function submitAnswer() {
-  if (!currentQuestion) return;
+  if (
+    !currentQuestion ||
+    interviewUIState.phase !== "progress" ||
+    behaviorState.terminated
+  ) {
+    return;
+  }
+
+  markAnswerSubmitted();
+  setListeningVisualState(false);
 
   const answer = studentAnswer.value.trim();
   const wordCount = answer.split(/\s+/).filter(Boolean).length;
@@ -153,20 +602,10 @@ function submitAnswer() {
     return;
   }
 
-  if (containsProfanity(answer)) {
-    showFeedback("profanity_detected");
-    return;
-  }
+  const behaviorResult = BehaviorEngine.analyze(answer, currentQuestion);
 
-  if (containsSpanish(answer)) {
-    spanishWarningCount++;
-
-    if (spanishWarningCount === 1) {
-      showFeedback("spanish_detected_first_time", "spanish_detected");
-    } else {
-      showFeedback("spanish_detected_second_time", "spanish_detected");
-    }
-
+  if (BehaviorEngine.applyResult(behaviorResult)) {
+    resetAnswerSubmissionState();
     return;
   }
 
@@ -189,16 +628,20 @@ function submitAnswer() {
 }
 
 function showFeedback(feedbackKey, textKey = null) {
+  if (!currentQuestion) return;
+
   const messageKey = textKey || feedbackKey;
 
-  feedbackMessage.textContent =
+  setFeedbackText(
     currentQuestion.feedbackText?.[messageKey] ||
-    "Please try again.";
+    "Please try again."
+  );
 
   protectedFeedback = feedbackKey === "partial_answer";
 
   if (feedbackKey === "partial_answer") {
     studentAnswer.value = "";
+    resetAnswerSubmissionState();
   }
 
   playFeedback(feedbackKey);
@@ -214,6 +657,8 @@ function showFeedback(feedbackKey, textKey = null) {
 }
 
 function playFeedback(feedbackKey) {
+  if (!currentQuestion) return;
+
   const assetKey = currentQuestion.feedbackMap?.[feedbackKey];
   const asset = interviewData.assets?.[assetKey];
 
@@ -225,7 +670,52 @@ function playFeedback(feedbackKey) {
   playAsset(asset);
 }
 
+function nextStep() {
+  if (!currentQuestion) return;
+
+  const questions = interviewData.interview.questions;
+  const currentIndex = questions.findIndex(q => q.id === currentQuestion.id);
+  const nextQuestion = questions[currentIndex + 1];
+
+  studentAnswer.value = "";
+  resetAnswerSubmissionState();
+  setListeningVisualState(false);
+
+  if (nextQuestion) {
+    currentQuestion = nextQuestion;
+    repeatCount = 0;
+
+    setFeedbackText(getQuestionGuideText(currentQuestion));
+
+    setTimeout(() => {
+      playQuestionVideo();
+    }, 600);
+
+    return;
+  }
+
+  moveToFinalInterviewState();
+}
+
+function moveToFinalInterviewState() {
+  currentQuestion = null;
+  protectedFeedback = false;
+
+  studentAnswer.value = "";
+  setFeedbackText("Interview completed");
+
+  updateInterviewButtons("final");
+
+  playAsset(interviewData.assets.finish);
+}
+
+function finishInterview() {
+  loadIdle();
+}
+
 function isGoodAnswer(text) {
+  if (!currentQuestion) return false;
+
   const lowerText = normalizeText(text);
 
   const hasPattern = currentQuestion.acceptablePatterns?.some(pattern =>
@@ -240,6 +730,8 @@ function isGoodAnswer(text) {
 }
 
 function isPartialAnswer(text) {
+  if (!currentQuestion) return false;
+
   const lowerText = normalizeText(text);
 
   const hasKeyword = currentQuestion.keywords?.some(keyword =>
@@ -305,10 +797,11 @@ function containsProfanity(text) {
 function showHint() {
   if (!currentQuestion) return;
 
-  feedbackMessage.textContent =
+  setFeedbackText(
     currentQuestion.feedbackText?.hint_requested ||
     currentQuestion.hint ||
-    "Use a complete sentence.";
+    "Use a complete sentence."
+  );
 
   protectedFeedback = true;
   playFeedback("hint_requested");
@@ -322,21 +815,11 @@ function showModelAnswer() {
     currentQuestion.exampleAnswer ||
     "I am interested in working as a legal advisor.";
 
-  feedbackMessage.textContent = `Model answer: "${model}"`;
+  setFeedbackText(`Model answer: "${model}"`);
   protectedFeedback = true;
   studentAnswer.value = "";
 
   playFeedback("modeling_requested");
-}
-
-function nextStep() {
-  feedbackMessage.textContent = "Interview finished. Great job!";
-
-  setActiveAction("nextBtn");
-
-  playAsset(interviewData.assets.finish, function () {
-    loadIdle();
-  });
 }
 
 /* SPEECH RECOGNITION */
@@ -344,61 +827,120 @@ function nextStep() {
 const SpeechRecognition =
   window.SpeechRecognition || window.webkitSpeechRecognition;
 
+let recognition = null;
+
 if (!SpeechRecognition) {
-  speakBtn.disabled = true;
-  speakBtn.textContent = "Speech not supported";
+  if (speakBtn) {
+    speakBtn.disabled = true;
+    setButtonLabel(speakBtn, "No mic");
+  }
 } else {
-  const recognition = new SpeechRecognition();
+  recognition = new SpeechRecognition();
 
   recognition.lang = "en-US";
   recognition.interimResults = false;
   recognition.continuous = false;
 
-  speakBtn.addEventListener("click", () => {
-    if (!protectedFeedback) {
-      feedbackMessage.textContent = "Emily is listening...";
-    }
-
-    speakBtn.textContent = "🎙 Listening...";
-    recognition.start();
-  });
-
   recognition.onresult = event => {
-    const spokenText = event.results[0][0].transcript;
-    studentAnswer.value += " " + spokenText;
+    const spokenText = event.results[0][0].transcript.trim();
+
+    studentAnswer.value = spokenText;
 
     if (!protectedFeedback) {
-      feedbackMessage.textContent = "Speech captured. You can submit your answer.";
+      setFeedbackText("Speech captured. You can submit your answer.");
     }
 
-    speakBtn.textContent = "🎤 Speak";
+    setListeningVisualState(false);
   };
 
   recognition.onerror = () => {
-    feedbackMessage.textContent =
-      "Microphone problem. You can type your answer instead.";
-    speakBtn.textContent = "🎤 Speak";
+    setFeedbackText("Microphone problem. You can type your answer instead.");
+    setListeningVisualState(false);
   };
 
   recognition.onend = () => {
-    speakBtn.textContent = "🎤 Speak";
+    setListeningVisualState(false);
   };
+}
+
+function startListeningSession() {
+  if (!recognition || !currentQuestion) return;
+
+  if (!protectedFeedback) {
+    setFeedbackText("Emily is listening...");
+  }
+
+  try {
+    recognition.abort();
+  } catch (error) {
+    console.warn("Recognition abort warning:", error);
+  }
+
+  setTimeout(() => {
+    try {
+      recognition.start();
+      setListeningVisualState(true);
+    } catch (error) {
+      console.warn("Recognition start warning:", error);
+      setListeningVisualState(false);
+    }
+  }, 180);
+}
+
+function handleSpeakPress() {
+  if (interviewUIState.phase !== "progress") return;
+
+  const shouldClearBeforeSpeaking =
+    !interviewUIState.hasSubmittedCurrentAnswer &&
+    studentAnswer.value.trim().length > 0;
+
+  if (shouldClearBeforeSpeaking) {
+    setListeningVisualState(false);
+    clearTranscriptBeforeNewSpeech();
+
+    setTimeout(() => {
+      resetAnswerSubmissionState();
+      startListeningSession();
+    }, 260);
+
+    return;
+  }
+
+  resetAnswerSubmissionState();
+  startListeningSession();
 }
 
 /* MAIN BUTTONS */
 
 nextBtn.addEventListener("click", () => {
-  startInterview();
+  if (interviewUIState.phase === "before") {
+    startInterview();
+    return;
+  }
+
+  if (interviewUIState.phase === "final") {
+    finishInterview();
+  }
 });
 
-repeatBtn.addEventListener("click", repeatQuestion);
+speakBtn.addEventListener("click", handleSpeakPress);
+
 submitBtn.addEventListener("click", submitAnswer);
 
 clearBtn.addEventListener("click", () => {
   studentAnswer.value = "";
   protectedFeedback = false;
-  feedbackMessage.textContent = "Answer area cleared.";
+  resetAnswerSubmissionState();
+  setFeedbackText("Answer area cleared.");
 });
+
+if (backBtn) {
+  backBtn.addEventListener("click", () => {
+    setFeedbackText("Back is not available in this practice version.");
+  });
+}
+
+repeatBtn.addEventListener("click", repeatQuestion);
 
 /* MENU */
 
@@ -431,11 +973,11 @@ slowModeBtn.addEventListener("click", () => {
 
   if (slowModeEnabled) {
     emilyVideo.playbackRate = 0.75;
-    feedbackMessage.textContent = "Slow mode activated.";
+    setFeedbackText("Slow mode activated.");
     slowModeBtn.textContent = "Slow mode ON";
   } else {
     emilyVideo.playbackRate = 1;
-    feedbackMessage.textContent = "Slow mode deactivated.";
+    setFeedbackText("Slow mode deactivated.");
     slowModeBtn.textContent = "Slow mode";
   }
 });
