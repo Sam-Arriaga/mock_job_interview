@@ -1,28 +1,34 @@
 let interviewData = null;
 let currentQuestion = null;
+let currentQuestionData = null;
 let repeatCount = 0;
 let spanishWarningCount = 0; // Legacy counter kept for backward compatibility.
 let offTopicWarningCount = 0; // Legacy counter kept for backward compatibility.
 let slowModeEnabled = false;
 let protectedFeedback = false;
+let activeSupportMode = null; // "hint", "captions", "model" or null
+const savedAnswers = {};
 
 const idleImage = document.getElementById("idleImage");
 const emilyVideo = document.getElementById("emilyVideo");
 const studentAnswer = document.getElementById("studentAnswer");
 const feedbackMessage = document.getElementById("feedbackBox");
-
+const captionPanel = document.getElementById("captionPanel");
+const captionText = document.getElementById("captionText");
 const backBtn = document.getElementById("backBtn");
 const speakBtn = document.getElementById("speakBtn");
 const repeatBtn = document.getElementById("repeatBtn");
 const submitBtn = document.getElementById("submitBtn");
 const nextBtn = document.getElementById("nextBtn");
 const clearBtn = document.getElementById("clearBtn");
+const progressDots = document.querySelectorAll(".progress-dot");
 
 const menuBtn = document.getElementById("menuBtn");
 const closeMenuBtn = document.getElementById("closeMenuBtn");
 const menuOverlay = document.getElementById("menuOverlay");
 
 const hintBtn = document.getElementById("hintBtn");
+const captionsBtn = document.getElementById("captionsBtn");
 const modelAnswerBtn = document.getElementById("modelAnswerBtn");
 const slowModeBtn = document.getElementById("slowModeBtn");
 
@@ -43,6 +49,137 @@ function setButtonLabel(button, label) {
   if (span) {
     span.textContent = label;
   }
+}
+
+function setCaptionText(text) {
+  if (!captionText) return;
+  captionText.textContent = text || "";
+}
+
+function setMenuButtonState(button, label, isActive) {
+  if (!button) return;
+
+  button.classList.toggle("is-active-support", isActive);
+  button.innerHTML = `
+    <span>${label}</span>
+    ${isActive ? '<span class="menu-state">ON</span>' : ""}
+  `;
+}
+
+function updateSupportMenuStates() {
+  setMenuButtonState(hintBtn, "Hint", activeSupportMode === "hint");
+  setMenuButtonState(captionsBtn, "Captions", activeSupportMode === "captions");
+  setMenuButtonState(modelAnswerBtn, "Modeling answer", activeSupportMode === "model");
+
+  if (slowModeBtn) {
+    slowModeBtn.innerHTML = `
+      <span>Slow mode</span>
+      ${slowModeEnabled ? '<span class="menu-state">ON</span>' : ""}
+    `;
+  }
+}
+
+function setActiveSupportMode(mode) {
+  activeSupportMode = activeSupportMode === mode ? null : mode;
+  updateSupportMenuStates();
+}
+
+function updateProgressBar() {
+  if (!progressDots || progressDots.length === 0) return;
+
+  const questions = interviewData?.interviewFlow?.questions;
+
+  if (!Array.isArray(questions) || !currentQuestion) {
+    progressDots.forEach((dot, index) => {
+      dot.classList.toggle("active", index === 0);
+    });
+    return;
+  }
+
+  const currentIndex = questions.findIndex(q => q.id === currentQuestion.id);
+
+  progressDots.forEach((dot, index) => {
+    dot.classList.toggle("active", index <= currentIndex);
+  });
+}
+function saveCurrentAnswer() {
+  if (!currentQuestion || !studentAnswer) return;
+  savedAnswers[currentQuestion.id] = studentAnswer.value;
+}
+
+function restoreCurrentAnswer() {
+  if (!currentQuestion || !studentAnswer) return;
+  studentAnswer.value = savedAnswers[currentQuestion.id] || "";
+}
+
+function updateBackButtonAvailability() {
+  if (!backBtn) return;
+
+  const questions = interviewData?.interviewFlow?.questions;
+
+  if (!Array.isArray(questions) || !currentQuestion) {
+    setButtonState(backBtn, { disabled: true, inactive: true });
+    return;
+  }
+
+  const currentIndex = questions.findIndex(q => q.id === currentQuestion.id);
+
+  if (currentIndex <= 0) {
+    setButtonState(backBtn, { disabled: true, inactive: true });
+  } else {
+    setButtonState(backBtn, { disabled: false, inactive: false });
+  }
+}
+
+function refreshCurrentQuestionScreen() {
+  if (!currentQuestion) return;
+
+  protectedFeedback = false;
+  resetAnswerSubmissionState();
+  setListeningVisualState(false);
+
+  restoreCurrentAnswer();
+  updateProgressBar();
+  updateBackButtonAvailability();
+
+  setFeedbackText(
+    currentQuestion.upperStatusText ||
+    getQuestionGuideText(currentQuestion) ||
+    currentQuestion.question ||
+    "Interview question"
+  );
+
+  playQuestionVideo();
+}
+
+function backStep() {
+  if (
+    !currentQuestion ||
+    interviewUIState.phase !== "progress" ||
+    behaviorState.terminated
+  ) {
+    return;
+  }
+
+  const questions = interviewData?.interviewFlow?.questions;
+
+  if (!Array.isArray(questions)) return;
+
+  const currentIndex = questions.findIndex(q => q.id === currentQuestion.id);
+
+  if (currentIndex <= 0) {
+    setFeedbackText("You are already on the first question.");
+    updateBackButtonAvailability();
+    return;
+  }
+
+  saveCurrentAnswer();
+
+  currentQuestion = questions[currentIndex - 1];
+  currentQuestionData = currentQuestion;
+  repeatCount = 0;
+
+  refreshCurrentQuestionScreen();
 }
 
 function setButtonState(button, {
@@ -88,15 +225,15 @@ function updateInterviewButtons(phase = "before") {
   }
 
   if (phase === "progress") {
-    setButtonState(speakBtn, { speakingPrimary: true });
-    setButtonState(submitBtn, {});
-    setButtonState(backBtn, {});
-    setButtonState(clearBtn, {});
-    setButtonState(nextBtn, { disabled: true, inactive: true });
+  setButtonState(speakBtn, { speakingPrimary: true });
+  setButtonState(submitBtn, {});
+  setButtonState(backBtn, {});
+  setButtonState(clearBtn, {});
+  setButtonState(nextBtn, { disabled: false, inactive: false });
 
-    setButtonLabel(nextBtn, "Start");
-    setButtonLabel(speakBtn, "Speak");
-  }
+  setButtonLabel(nextBtn, "Next");
+  setButtonLabel(speakBtn, "Speak");
+}
 
   if (phase === "final") {
     setButtonState(nextBtn, { primary: true });
@@ -462,11 +599,15 @@ fetch("interview-flow.json")
 
 function loadIdle() {
   currentQuestion = null;
+  currentQuestionData = null;
   protectedFeedback = false;
+  activeSupportMode = null;
+  updateSupportMenuStates();
   repeatCount = 0;
   spanishWarningCount = 0;
   offTopicWarningCount = 0;
   BehaviorEngine.reset();
+  Object.keys(savedAnswers).forEach(key => delete savedAnswers[key]);
 
   studentAnswer.value = "";
   setFeedbackText("Ready to begin?");
@@ -480,7 +621,7 @@ function loadIdle() {
   emilyVideo.load();
   emilyVideo.style.display = "none";
   emilyVideo.classList.add("hidden");
-
+  updateProgressBar();
   resetInterviewUIState();
 }
 
@@ -494,9 +635,23 @@ function resetInterviewUIState() {
 }
 
 function startInterview() {
-  if (!interviewData) return;
+  if (!interviewData) {
+    setFeedbackText("Interview data is still loading.");
+    return;
+  }
 
-  currentQuestion = interviewData.interview.questions[0];
+  const questions = interviewData?.interviewFlow?.questions;
+
+  if (!Array.isArray(questions) || questions.length === 0) {
+    console.error("Invalid JSON structure:", interviewData);
+    setFeedbackText("Interview questions not found in JSON.");
+    return;
+  }
+
+  currentQuestion = questions[0];
+  currentQuestionData = currentQuestion;
+  updateProgressBar();
+  updateBackButtonAvailability();
   repeatCount = 0;
   spanishWarningCount = 0;
   offTopicWarningCount = 0;
@@ -507,6 +662,12 @@ function startInterview() {
   setFeedbackText("Meet Emily");
 
   updateInterviewButtons("progress");
+
+  if (!interviewData.assets?.intro) {
+    console.error("Intro asset not found:", interviewData.assets);
+    setFeedbackText("Intro video not found.");
+    return;
+  }
 
   playAsset(interviewData.assets.intro, function () {
     playQuestionVideo();
@@ -519,9 +680,22 @@ function playQuestionVideo() {
   protectedFeedback = false;
   resetAnswerSubmissionState();
 
-  setFeedbackText(getQuestionGuideText(currentQuestion));
+  setFeedbackText(
+    currentQuestion.upperStatusText ||
+    currentQuestion.question ||
+    "Interview question"
+  );
 
-  playAsset(currentQuestion.video);
+  const videoKey = currentQuestion.video;
+  const videoAsset = interviewData.assets?.[videoKey];
+
+  if (!videoAsset) {
+    console.error("Question video asset missing:", videoKey);
+    setFeedbackText("Question video not found.");
+    return;
+  }
+
+  playAsset(videoAsset);
 }
 
 function getQuestionGuideText(question) {
@@ -567,19 +741,25 @@ function playAsset(asset, onEndedCallback = null) {
 }
 
 function repeatQuestion() {
-  if (!currentQuestion || !currentQuestion.repeat?.allowed) return;
+  if (!currentQuestion) return;
 
   repeatCount++;
 
-  if (repeatCount > currentQuestion.repeat.limit) {
-    setFeedbackText(
-      currentQuestion.repeat.onLimitReached?.message ||
-      "You have reached the repeat limit. Please use Hint or Modeling Answer if you need support."
-    );
-    return;
-  }
+  setFeedbackText(
+    currentQuestion.upperStatusText ||
+    currentQuestion.question ||
+    "Repeating the question."
+  );
 
   playQuestionVideo();
+
+  if (repeatBtn) {
+    repeatBtn.classList.add("active-repeat");
+
+    setTimeout(() => {
+      repeatBtn.classList.remove("active-repeat");
+    }, 400);
+  }
 }
 
 function submitAnswer() {
@@ -609,7 +789,7 @@ function submitAnswer() {
     return;
   }
 
-  if (wordCount < currentQuestion.studentInput.minWords) {
+  if (wordCount < currentQuestion.evaluationCriteria.minWords) {
     showFeedback("too_short");
     return;
   }
@@ -673,9 +853,11 @@ function playFeedback(feedbackKey) {
 function nextStep() {
   if (!currentQuestion) return;
 
-  const questions = interviewData.interview.questions;
+  const questions = interviewData.interviewFlow.questions;
   const currentIndex = questions.findIndex(q => q.id === currentQuestion.id);
   const nextQuestion = questions[currentIndex + 1];
+
+  saveCurrentAnswer();
 
   studentAnswer.value = "";
   resetAnswerSubmissionState();
@@ -683,7 +865,11 @@ function nextStep() {
 
   if (nextQuestion) {
     currentQuestion = nextQuestion;
+    currentQuestionData = currentQuestion;
     repeatCount = 0;
+    restoreCurrentAnswer();
+    updateProgressBar();
+    updateBackButtonAvailability();
 
     setFeedbackText(getQuestionGuideText(currentQuestion));
 
@@ -718,11 +904,15 @@ function isGoodAnswer(text) {
 
   const lowerText = normalizeText(text);
 
-  const hasPattern = currentQuestion.acceptablePatterns?.some(pattern =>
-    lowerText.includes(pattern)
+  const criteria = currentQuestion.evaluationCriteria;
+
+  if (!criteria) return false;
+
+  const hasPattern = criteria.acceptablePatterns?.some(pattern =>
+    lowerText.includes(pattern.toLowerCase())
   );
 
-  const hasKeyword = currentQuestion.keywords?.some(keyword =>
+  const hasKeyword = criteria.keywords?.some(keyword =>
     lowerText.includes(keyword.toLowerCase())
   );
 
@@ -734,15 +924,19 @@ function isPartialAnswer(text) {
 
   const lowerText = normalizeText(text);
 
-  const hasKeyword = currentQuestion.keywords?.some(keyword =>
+  const criteria = currentQuestion.evaluationCriteria;
+
+  if (!criteria) return false;
+
+  const hasKeyword = criteria.keywords?.some(keyword =>
     lowerText.includes(keyword.toLowerCase())
   );
 
   const hasSomeStructure =
-    lowerText.includes("interested") ||
-    lowerText.includes("work") ||
-    lowerText.includes("job") ||
-    lowerText.includes("position");
+    lowerText.includes("i am") ||
+    lowerText.includes("i can") ||
+    lowerText.includes("i like") ||
+    lowerText.includes("i have");
 
   return hasKeyword || hasSomeStructure;
 }
@@ -797,29 +991,42 @@ function containsProfanity(text) {
 function showHint() {
   if (!currentQuestion) return;
 
-  setFeedbackText(
-    currentQuestion.feedbackText?.hint_requested ||
-    currentQuestion.hint ||
-    "Use a complete sentence."
-  );
+  setActiveSupportMode("hint");
 
-  protectedFeedback = true;
-  playFeedback("hint_requested");
+  if (activeSupportMode === "hint") {
+    setCaptionText(currentQuestion.hint || "Use a complete sentence.");
+    setFeedbackText("Hint opened.");
+    protectedFeedback = true;
+    playFeedback("hint_requested");
+  } else {
+    setCaptionText("");
+    setFeedbackText("Hint closed.");
+    protectedFeedback = false;
+  }
 }
 
 function showModelAnswer() {
   if (!currentQuestion) return;
 
-  const model =
-    currentQuestion.modelAnswers?.[0] ||
-    currentQuestion.exampleAnswer ||
-    "I am interested in working as a legal advisor.";
+  setActiveSupportMode("model");
 
-  setFeedbackText(`Model answer: "${model}"`);
-  protectedFeedback = true;
-  studentAnswer.value = "";
+  if (activeSupportMode === "model") {
+    const model =
+      currentQuestion.modelingAnswer ||
+      currentQuestion.modelAnswers?.[0] ||
+      currentQuestion.exampleAnswer ||
+      "I am interested in working as a legal advisor.";
 
-  playFeedback("modeling_requested");
+    setCaptionText(`Model answer: "${model}"`);
+    setFeedbackText("Model answer opened.");
+
+    protectedFeedback = true;
+    studentAnswer.value = "";
+  } else {
+    setCaptionText("");
+    setFeedbackText("Model answer closed.");
+    protectedFeedback = false;
+  }
 }
 
 /* SPEECH RECOGNITION */
@@ -912,35 +1119,48 @@ function handleSpeakPress() {
 
 /* MAIN BUTTONS */
 
-nextBtn.addEventListener("click", () => {
-  if (interviewUIState.phase === "before") {
-    startInterview();
-    return;
-  }
+if (nextBtn) {
+  nextBtn.addEventListener("click", () => {
+    if (interviewUIState.phase === "before") {
+      startInterview();
+      return;
+    }
 
-  if (interviewUIState.phase === "final") {
-    finishInterview();
-  }
-});
+    if (interviewUIState.phase === "progress") {
+      nextStep();
+      return;
+    }
 
-speakBtn.addEventListener("click", handleSpeakPress);
-
-submitBtn.addEventListener("click", submitAnswer);
-
-clearBtn.addEventListener("click", () => {
-  studentAnswer.value = "";
-  protectedFeedback = false;
-  resetAnswerSubmissionState();
-  setFeedbackText("Answer area cleared.");
-});
-
-if (backBtn) {
-  backBtn.addEventListener("click", () => {
-    setFeedbackText("Back is not available in this practice version.");
+    if (interviewUIState.phase === "final") {
+      finishInterview();
+    }
   });
 }
 
-repeatBtn.addEventListener("click", repeatQuestion);
+if (speakBtn) {
+  speakBtn.addEventListener("click", handleSpeakPress);
+}
+
+if (submitBtn) {
+  submitBtn.addEventListener("click", submitAnswer);
+}
+
+if (clearBtn) {
+  clearBtn.addEventListener("click", () => {
+    studentAnswer.value = "";
+    protectedFeedback = false;
+    resetAnswerSubmissionState();
+    setFeedbackText("Answer area cleared.");
+  });
+}
+
+if (backBtn) {
+  backBtn.addEventListener("click", backStep);
+}
+
+if (repeatBtn) {
+  repeatBtn.addEventListener("click", repeatQuestion);
+}
 
 /* MENU */
 
@@ -967,17 +1187,41 @@ modelAnswerBtn.addEventListener("click", () => {
   showModelAnswer();
   menuOverlay.classList.add("hidden");
 });
+if (captionsBtn) {
+  captionsBtn.addEventListener("click", () => {
+    if (!currentQuestion) return;
 
-slowModeBtn.addEventListener("click", () => {
-  slowModeEnabled = !slowModeEnabled;
+    setActiveSupportMode("captions");
 
-  if (slowModeEnabled) {
-    emilyVideo.playbackRate = 0.75;
-    setFeedbackText("Slow mode activated.");
-    slowModeBtn.textContent = "Slow mode ON";
-  } else {
-    emilyVideo.playbackRate = 1;
-    setFeedbackText("Slow mode deactivated.");
-    slowModeBtn.textContent = "Slow mode";
-  }
-});
+    if (activeSupportMode === "captions") {
+      setCaptionText(
+        currentQuestion.caption ||
+        currentQuestion.question ||
+        "No captions available."
+      );
+
+      setFeedbackText("Captions opened.");
+      protectedFeedback = true;
+    } else {
+      setCaptionText("");
+      setFeedbackText("Captions closed.");
+      protectedFeedback = false;
+    }
+
+    menuOverlay.classList.add("hidden");
+  });
+}
+
+if (slowModeBtn) {
+  slowModeBtn.addEventListener("click", () => {
+    slowModeEnabled = !slowModeEnabled;
+
+    emilyVideo.playbackRate = slowModeEnabled ? 0.75 : 1;
+
+    setFeedbackText(
+      slowModeEnabled ? "Slow mode activated." : "Slow mode deactivated."
+    );
+
+    updateSupportMenuStates();
+  });
+}
