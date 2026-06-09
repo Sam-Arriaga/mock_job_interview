@@ -6,6 +6,8 @@ let spanishWarningCount = 0; // Legacy counter kept for backward compatibility.
 let offTopicWarningCount = 0; // Legacy counter kept for backward compatibility.
 let slowModeEnabled = false;
 let protectedFeedback = false;
+let emilyIsTalking = false;
+let idleHasDisplayed = false;
 let activeSupportMode = null; // "hint", "captions", "model" or null
 const savedAnswers = {};
 
@@ -31,6 +33,8 @@ const hintBtn = document.getElementById("hintBtn");
 const captionsBtn = document.getElementById("captionsBtn");
 const modelAnswerBtn = document.getElementById("modelAnswerBtn");
 const slowModeBtn = document.getElementById("slowModeBtn");
+const instructionsBtn = document.getElementById("instructionsBtn");
+const finishBtn = document.getElementById("finishBtn");
 
 emilyVideo.playsInline = true;
 
@@ -370,6 +374,23 @@ const BehaviorEngine = (() => {
     "tell me a joke",
     "let's talk about something else"
   ];
+  
+  const academicTerms = [
+  "law",
+  "psychology",
+  "architecture",
+  "engineering",
+  "marketing",
+  "medicine",
+  "design",
+  "management",
+  "finance",
+  "economics",
+  "business",
+  "tourism",
+  "education",
+  "accounting"
+];
 
   function reset() {
     behaviorState.profanityWarningCount = 0;
@@ -517,9 +538,9 @@ const BehaviorEngine = (() => {
           "Try to connect your answer to the interview question. Give a short professional answer."
       });
     }
-
+    
     return createResult({ handled: false });
-  }
+    }
 
   function isSoftOffTopic(text, question) {
     if (!question) return false;
@@ -542,9 +563,17 @@ const BehaviorEngine = (() => {
       text.includes(signal)
     );
 
-    const hasQuestionKeyword = question.keywords?.some(keyword =>
-      text.includes(keyword.toLowerCase())
-    );
+    const categories = question?.evaluationCriteria?.semanticCategories || [];
+const oldKeywords = question?.evaluationCriteria?.keywords || [];
+
+const softSemanticSignals = [
+  ...oldKeywords,
+  ...categories
+];
+
+const hasQuestionKeyword = softSemanticSignals.some(signal =>
+  text.includes(String(signal).replaceAll("_", " ").toLowerCase())
+);
 
     return !hasProfessionalSignal && !hasQuestionKeyword && text.split(" ").length >= 5;
   }
@@ -563,14 +592,16 @@ const BehaviorEngine = (() => {
     return true;
   }
 
-  return {
+    return {
     reset,
     analyze,
     applyResult
   };
 })();
 
+
 function terminateInterviewByBehavior() {
+  IdleTimerEngine.cancel();
   behaviorState.terminated = true;
   currentQuestion = null;
   studentAnswer.value = "";
@@ -579,6 +610,427 @@ function terminateInterviewByBehavior() {
 
   if (interviewData?.assets?.finish) {
     playAsset(interviewData.assets.finish);
+  }
+}
+
+
+
+/* =========================================================
+   IDLE TIMER ENGINE
+   Starts only after Emily has stopped talking.
+   It never runs while Emily is speaking, in final state,
+   or after behavior termination.
+========================================================= */
+
+const IdleTimerEngine = (() => {
+  let timerId = null;
+
+  function getDelayMs() {
+    const seconds =
+      interviewData?.settings?.idleBehavior?.delaySeconds ||
+      interviewData?.assets?.idleBehavior?.delaySeconds ||
+      25;
+
+    return Number(seconds) * 1000;
+  }
+
+  function isEnabled() {
+    return (
+      interviewData?.settings?.idleBehavior?.enabled !== false &&
+      interviewData?.assets?.idleBehavior?.enabled !== false
+    );
+  }
+
+  function canRun() {
+    return (
+      isEnabled() &&
+      interviewUIState.phase === "progress" &&
+      currentQuestion &&
+      !interviewUIState.finalReached &&
+      !behaviorState.terminated &&
+      !emilyIsTalking
+    );
+  }
+
+  function cancel() {
+    if (timerId) {
+      clearTimeout(timerId);
+      timerId = null;
+    }
+  }
+
+  function start() {
+    cancel();
+
+    if (!canRun()) return;
+
+    timerId = setTimeout(() => {
+      if (!canRun()) return;
+      showIdleVisualOnly();
+    }, getDelayMs());
+  }
+
+  function reset() {
+    cancel();
+
+    if (canRun()) {
+      start();
+    }
+  }
+
+  function showIdleVisualOnly() {
+    if (!interviewData?.assets?.idle?.url || !canRun()) return;
+
+    idleHasDisplayed = true;
+    idleImage.src = interviewData.assets.idle.url;
+    idleImage.style.display = "block";
+    idleImage.classList.remove("hidden");
+
+    emilyVideo.pause();
+    emilyVideo.style.display = "none";
+    emilyVideo.classList.add("hidden");
+
+    if (!protectedFeedback) {
+      setFeedbackText("Take your time. Emily is ready when you are.");
+    }
+  }
+
+  function registerUserActivity() {
+    idleHasDisplayed = false;
+    reset();
+  }
+
+  return {
+    start,
+    cancel,
+    reset,
+    registerUserActivity
+  };
+})();
+
+function bindIdleUserActivityListeners() {
+  if (studentAnswer) {
+    ["input", "keydown", "paste"].forEach(eventName => {
+      studentAnswer.addEventListener(eventName, () => {
+        IdleTimerEngine.registerUserActivity();
+      });
+    });
+  }
+
+  document.addEventListener("click", event => {
+    if (event.target.closest("button")) {
+      IdleTimerEngine.registerUserActivity();
+    }
+  });
+}
+
+bindIdleUserActivityListeners();
+
+/* =========================================================
+   DYNAMIC FEEDBACK SELECTOR + FUTURE CHATGPT HOOK
+   Behavior rules are evaluated first in submitAnswer().
+========================================================= */
+
+const AnswerQualityEngine = (() => {
+  function getWordCount(text) {
+    return normalizeText(text).split(" ").filter(Boolean).length;
+  }
+
+  function hasAnyMatch(text, items = []) {
+    const lowerText = normalizeText(text);
+
+    return items.some(item => lowerText.includes(String(item).toLowerCase()));
+  }
+
+function getSemanticTermsForQuestion(question) {
+  const criteria = question?.evaluationCriteria || {};
+
+  const semanticLibrary = {
+    academic_field: [
+      "law", "psychology", "architecture", "engineering", "marketing",
+      "medicine", "design", "management", "finance", "economics",
+      "business", "tourism", "education", "accounting", "international trade"
+    ],
+
+    university_major: [
+      "major", "degree", "bachelor", "program", "student",
+      "university", "college", "school", "studying", "study"
+    ],
+
+    degree_program: [
+      "bachelor", "degree", "major", "program", "career"
+    ],
+
+    job_position: [
+  "lawyer", "accountant", "manager", "assistant", "engineer",
+  "developer", "designer", "teacher", "analyst", "receptionist",
+  "consultant", "supervisor", "coordinator", "legal advisor"
+],
+
+professional_area: [
+  "finance", "marketing", "human resources", "accounting", "law",
+  "engineering", "management", "business", "tourism", "education",
+  "technology", "sales", "administration", "customer service"
+],
+
+career_interest: [
+  "career", "job", "position", "work", "working", "profession",
+  "professional area", "interested", "future"
+],
+
+study_field: [
+  "law", "accounting", "engineering", "management", "marketing",
+  "finance", "business", "tourism", "education", "psychology",
+  "architecture", "international trade"
+],
+
+    responsibility: [
+      "reports", "documents", "customers", "team", "project",
+      "records", "files", "sales", "events", "coordinating"
+    ],
+
+    personal_activity: [
+      "reading", "exercise", "sports", "music", "family",
+      "learning", "traveling", "cooking", "swimming"
+    ],
+
+    professional_skill: [
+      "communication", "organization", "teamwork", "problem solving",
+      "leadership", "responsibility", "technology", "programming"
+    ],
+
+    teamwork_experience: [
+      "team", "project", "classmates", "coworkers", "organized",
+      "helped", "presented", "planned", "leader", "coordinated"
+    ],
+
+    independent_task: [
+  "reports", "files", "emails", "documents", "research",
+  "analysis", "customer service", "planning", "pressure", "time", "tasks"
+],
+
+school_context: [
+  "school", "university", "college", "class", "classmates",
+  "teacher", "project", "homework", "presentation", "academic"
+],
+
+work_context: [
+  "work", "job", "company", "office", "customers", "clients",
+  "coworkers", "boss", "manager", "internship", "professional"
+],
+
+internship_context: [
+  "internship", "intern", "training", "practice", "professional practice",
+  "company", "office", "supervisor"
+],
+
+sports_or_extracurricular_context: [
+  "sports", "soccer", "football", "gym", "exercise", "basketball",
+  "music", "club", "dance", "swimming", "extracurricular"
+],
+
+hobby_or_interest: [
+  "reading", "music", "sports", "exercise", "traveling", "cooking",
+  "swimming", "learning", "family", "friends", "movies", "french"
+],
+
+professional_ability: [
+  "solve problems", "solving problems", "organize", "manage",
+  "communicate", "lead", "work under pressure", "use technology",
+  "programming", "responsible", "independent", "confident"
+],
+
+task_management: [
+  "manage my time", "time", "planning", "organize", "complete tasks",
+  "finish tasks", "work independently", "under pressure", "prioritize"
+],
+
+craft_or_hobby_skill: [
+  "drawing", "design", "cooking", "music", "photography",
+  "writing", "painting", "crafts", "editing"
+]
+  };
+
+  const oldKeywords = criteria.keywords || [];
+
+  const semanticTerms = (criteria.semanticCategories || [])
+    .flatMap(category => semanticLibrary[category] || []);
+
+  return [...new Set([...oldKeywords, ...semanticTerms])];
+}
+
+function hasQuestionKeyword(answer, question) {
+  return hasAnyMatch(answer, getSemanticTermsForQuestion(question));
+}
+
+  function hasAcceptedPattern(answer, question) {
+    return hasAnyMatch(answer, question?.evaluationCriteria?.acceptablePatterns || []);
+  }
+
+  function hasCommunicativeFallback(answer) {
+    const text = normalizeText(answer);
+
+    const fallbackSignals = [
+      "i am",
+      "i'm",
+      "i have",
+      "i can",
+      "i like",
+      "i enjoy",
+      "i want",
+      "i study",
+      "my major",
+      "yes i"
+    ];
+
+    return fallbackSignals.some(signal => text.includes(signal));
+  }
+
+  function classify(answer, question) {
+    const wordCount = getWordCount(answer);
+
+    if (wordCount === 0) {
+      return {
+        key: "empty_answer",
+        shouldAdvance: false,
+        needsAIFeedback: false
+      };
+    }
+
+    if (wordCount <= 3) {
+      return {
+        key: "too_short",
+        shouldAdvance: false,
+        needsAIFeedback: false
+      };
+    }
+
+    const hasKeyword = hasQuestionKeyword(answer, question);
+    const hasPattern = hasAcceptedPattern(answer, question);
+    const hasFallback = hasCommunicativeFallback(answer);
+    const meetsQuestionMinWords =
+      wordCount >= Number(question?.evaluationCriteria?.minWords || 4);
+
+    if (hasKeyword && hasPattern && meetsQuestionMinWords) {
+      return {
+        key: "good_answer",
+        shouldAdvance: true,
+        needsAIFeedback: false
+      };
+    }
+
+    if (wordCount >= 4 && hasKeyword) {
+      return {
+        key: "partial_answer",
+        shouldAdvance: false,
+        needsAIFeedback: true,
+        reason: "keyword_detected_partial_success"
+      };
+    }
+
+    if (wordCount >= 4 && hasPattern) {
+      return {
+        key: "partial_answer",
+        shouldAdvance: false,
+        needsAIFeedback: true,
+        reason: "pattern_detected_but_keyword_missing"
+      };
+    }
+
+    if (wordCount >= 4 && hasFallback) {
+      return {
+        key: "partial_answer",
+        shouldAdvance: false,
+        needsAIFeedback: true,
+        reason: "intelligent_fallback_partial_success"
+      };
+    }
+
+    return {
+      key: "needs_improvement",
+      shouldAdvance: false,
+      needsAIFeedback: true,
+      reason: "no_clear_keyword_or_pattern"
+    };
+  }
+
+  return {
+  classify,
+  getSemanticTermsForQuestion
+};
+})();
+
+async function requestAIGrammarFeedback(answer, question) {
+  const questionNumber = Number(String(question?.id || "").split("_").pop());
+  const model = question?.modelingAnswer || "Use a complete professional sentence.";
+  const text = normalizeText(answer);
+
+  let suggestion = model;
+
+  if (questionNumber === 1) {
+    suggestion = "I am interested in working as a lawyer because I want to help people.";
+  }
+
+  if (questionNumber === 2) {
+    suggestion = "I am studying law, and I have studied it for three years.";
+  }
+
+  if (questionNumber === 3) {
+    suggestion = "I have been responsible for organizing documents and working with my team.";
+  }
+
+  if (questionNumber === 4) {
+    suggestion = "I am interested in exercising and spending time with my family.";
+  }
+
+  if (questionNumber === 5) {
+    suggestion = "I am good at teamwork and solving problems in a professional environment.";
+  }
+
+  if (questionNumber === 6) {
+    suggestion = "Yes, I have worked on a team project and helped organize the presentation.";
+  }
+
+  if (questionNumber === 7) {
+    suggestion = "I am able to manage my time and complete documents independently.";
+  }
+
+  return {
+    source: "mock_local",
+    message:
+      text.length > 0
+        ? `Good effort. Your idea is partly communicative. Try this clearer version: “${suggestion}”`
+        : "Please write or say your answer first."
+  };
+}
+
+function getSemiFixedAIFeedbackKey(question) {
+  const questionNumber = Number(String(question?.id || "").split("_").pop());
+
+  if (questionNumber >= 1 && questionNumber <= 3) {
+    return "try_reading_feedback";
+  }
+
+  return "try_again_feedback";
+}
+
+async function showDynamicAIFeedback(answer, question, fallbackKey = "partial_answer") {
+  const aiResult = await requestAIGrammarFeedback(answer, question);
+
+  protectedFeedback = true;
+  setFeedbackText(
+    aiResult?.message ||
+    question?.feedbackText?.[fallbackKey] ||
+    "Try again with a clearer complete sentence."
+  );
+
+  const assetKey = getSemiFixedAIFeedbackKey(question);
+  const asset = interviewData.assets?.[assetKey];
+
+  if (asset) {
+    playAsset(asset);
+  } else {
+    playFeedback(fallbackKey);
   }
 }
 
@@ -600,6 +1052,8 @@ fetch("interview-flow.json")
 function loadIdle() {
   currentQuestion = null;
   currentQuestionData = null;
+  IdleTimerEngine.cancel();
+  idleHasDisplayed = false;
   protectedFeedback = false;
   activeSupportMode = null;
   updateSupportMenuStates();
@@ -715,6 +1169,10 @@ function getQuestionGuideText(question) {
 function playAsset(asset, onEndedCallback = null) {
   if (!asset || !asset.url) return;
 
+  IdleTimerEngine.cancel();
+  emilyIsTalking = true;
+  idleHasDisplayed = false;
+
   idleImage.style.display = "none";
   idleImage.classList.add("hidden");
 
@@ -730,12 +1188,18 @@ function playAsset(asset, onEndedCallback = null) {
   emilyVideo.load();
 
   emilyVideo.onended = function () {
+    emilyIsTalking = false;
+
     if (typeof onEndedCallback === "function") {
       onEndedCallback();
     }
+
+    IdleTimerEngine.start();
   };
 
   emilyVideo.play().catch(error => {
+    emilyIsTalking = false;
+    IdleTimerEngine.start();
     console.warn("Video autoplay blocked or failed:", error);
   });
 }
@@ -744,6 +1208,11 @@ function repeatQuestion() {
   if (!currentQuestion) return;
 
   repeatCount++;
+
+  // CLOSE MENU OVERLAY
+  if (menuOverlay) {
+    menuOverlay.classList.add("hidden");
+  }
 
   setFeedbackText(
     currentQuestion.upperStatusText ||
@@ -760,9 +1229,9 @@ function repeatQuestion() {
       repeatBtn.classList.remove("active-repeat");
     }, 400);
   }
-}
+ }
 
-function submitAnswer() {
+async function submitAnswer() {
   if (
     !currentQuestion ||
     interviewUIState.phase !== "progress" ||
@@ -771,16 +1240,18 @@ function submitAnswer() {
     return;
   }
 
-  markAnswerSubmitted();
-  setListeningVisualState(false);
-
+  IdleTimerEngine.registerUserActivity();
+  
   const answer = studentAnswer.value.trim();
-  const wordCount = answer.split(/\s+/).filter(Boolean).length;
 
+  // Validación rápida para respuestas vacías (evita análisis innecesarios)
   if (answer.length === 0) {
     showFeedback("empty_answer");
     return;
   }
+
+  markAnswerSubmitted();
+  setListeningVisualState(false);
 
   const behaviorResult = BehaviorEngine.analyze(answer, currentQuestion);
 
@@ -789,22 +1260,19 @@ function submitAnswer() {
     return;
   }
 
-  if (wordCount < currentQuestion.evaluationCriteria.minWords) {
-    showFeedback("too_short");
+  const feedbackResult = AnswerQualityEngine.classify(answer, currentQuestion);
+
+  if (feedbackResult.needsAIFeedback) {
+    resetAnswerSubmissionState();
+    await showDynamicAIFeedback(
+      answer,
+      currentQuestion,
+      feedbackResult.key
+    );
     return;
   }
 
-  if (isGoodAnswer(answer)) {
-    showFeedback("good_answer");
-    return;
-  }
-
-  if (isPartialAnswer(answer)) {
-    showFeedback("partial_answer");
-    return;
-  }
-
-  showFeedback("needs_improvement");
+  showFeedback(feedbackResult.key);
 }
 
 function showFeedback(feedbackKey, textKey = null) {
@@ -814,7 +1282,9 @@ function showFeedback(feedbackKey, textKey = null) {
 
   setFeedbackText(
     currentQuestion.feedbackText?.[messageKey] ||
-    "Please try again."
+    (messageKey === "needs_improvement"
+      ? "Try again with a clearer complete sentence related to the question."
+      : "Please try again.")
   );
 
   protectedFeedback = feedbackKey === "partial_answer";
@@ -851,6 +1321,7 @@ function playFeedback(feedbackKey) {
 }
 
 function nextStep() {
+  IdleTimerEngine.registerUserActivity();
   if (!currentQuestion) return;
 
   const questions = interviewData.interviewFlow.questions;
@@ -884,6 +1355,7 @@ function nextStep() {
 }
 
 function moveToFinalInterviewState() {
+  IdleTimerEngine.cancel();
   currentQuestion = null;
   protectedFeedback = false;
 
@@ -912,7 +1384,9 @@ function isGoodAnswer(text) {
     lowerText.includes(pattern.toLowerCase())
   );
 
-  const hasKeyword = criteria.keywords?.some(keyword =>
+  const hasKeyword = AnswerQualityEngine
+  .getSemanticTermsForQuestion(currentQuestion)
+  .some(keyword =>
     lowerText.includes(keyword.toLowerCase())
   );
 
@@ -928,9 +1402,9 @@ function isPartialAnswer(text) {
 
   if (!criteria) return false;
 
-  const hasKeyword = criteria.keywords?.some(keyword =>
-    lowerText.includes(keyword.toLowerCase())
-  );
+  const hasKeyword = AnswerQualityEngine
+  .getSemanticTermsForQuestion(currentQuestion)
+  .some(keyword => lowerText.includes(keyword.toLowerCase()));
 
   const hasSomeStructure =
     lowerText.includes("i am") ||
@@ -1052,6 +1526,7 @@ if (!SpeechRecognition) {
     const spokenText = event.results[0][0].transcript.trim();
 
     studentAnswer.value = spokenText;
+    IdleTimerEngine.registerUserActivity();
 
     if (!protectedFeedback) {
       setFeedbackText("Speech captured. You can submit your answer.");
@@ -1072,6 +1547,8 @@ if (!SpeechRecognition) {
 
 function startListeningSession() {
   if (!recognition || !currentQuestion) return;
+
+  IdleTimerEngine.registerUserActivity();
 
   if (!protectedFeedback) {
     setFeedbackText("Emily is listening...");
@@ -1119,6 +1596,27 @@ function handleSpeakPress() {
 
 /* MAIN BUTTONS */
 
+function handleEnterSubmit(event) {
+  if (event.key !== "Enter") return;
+  if (event.shiftKey) return;
+
+  if (
+    !currentQuestion ||
+    interviewUIState.phase !== "progress" ||
+    behaviorState.terminated ||
+    emilyIsTalking
+  ) {
+    return;
+  }
+
+  const hasAnswer = studentAnswer.value.trim().length > 0;
+
+  if (!hasAnswer) return;
+
+  event.preventDefault();
+  submitAnswer();
+}
+
 if (nextBtn) {
   nextBtn.addEventListener("click", () => {
     if (interviewUIState.phase === "before") {
@@ -1145,6 +1643,10 @@ if (submitBtn) {
   submitBtn.addEventListener("click", submitAnswer);
 }
 
+if (studentAnswer) {
+  studentAnswer.addEventListener("keydown", handleEnterSubmit);
+}
+
 if (clearBtn) {
   clearBtn.addEventListener("click", () => {
     studentAnswer.value = "";
@@ -1158,9 +1660,10 @@ if (backBtn) {
   backBtn.addEventListener("click", backStep);
 }
 
-if (repeatBtn) {
+  if (repeatBtn) {
   repeatBtn.addEventListener("click", repeatQuestion);
 }
+
 
 /* MENU */
 
@@ -1223,5 +1726,31 @@ if (slowModeBtn) {
     );
 
     updateSupportMenuStates();
+  });
+}
+const SILVERCLASSROOM_LANDING_URL = "https://silverclassroom.com/lms2";
+
+function confirmAndExitInterview() {
+  const wantsToQuit = window.confirm(
+    "Are you sure you want to leave the interview? Your current progress may not be saved."
+  );
+
+  if (!wantsToQuit) return;
+
+IdleTimerEngine.cancel();
+recognition?.abort?.();
+
+window.location.assign(SILVERCLASSROOM_LANDING_URL);
+}
+
+if (instructionsBtn) {
+  instructionsBtn.addEventListener("click", () => {
+    window.location.href = SILVERCLASSROOM_LANDING_URL;
+  });
+}
+
+if (finishBtn) {
+  finishBtn.addEventListener("click", () => {
+    confirmAndExitInterview();
   });
 }

@@ -2,16 +2,47 @@
   "project": "SilverClassroom Emily Interview Coach",
   "version": "3.0",
   "mode": "horizontal_16_9",
-
   "settings": {
     "repeatLimit": 3,
     "inputMode": "speech_and_text",
     "defaultCaptionMode": "full",
     "returnToIdleAfterFinish": true,
     "totalQuestions": 7,
-    "behaviorRulesIndependent": true
+    "behaviorRulesIndependent": true,
+    "idleBehavior": {
+      "enabled": true,
+      "delaySeconds": 25,
+      "startsOnlyAfterVideoEnded": true,
+      "onlyAfterEmilyStopsTalking": true,
+      "cancelOnTyping": true,
+      "cancelOnButtonClick": true,
+      "cancelOnMicrophoneUse": true,
+      "disableInFinalOrTerminatedState": true
+    },
+    "dynamicFeedbackSelector": {
+      "enabled": true,
+      "tooShortMaxWords": 3,
+      "partialSuccessMinWords": 4,
+      "prioritizeBehaviorRules": [
+        "profanity_detected",
+        "spanish_detected",
+        "off_topic"
+      ],
+      "acceptPartialCommunicativeSuccess": true,
+      "advanceOnlyOnGoodOrExcellent": true,
+      "fallbackMode": "intelligent_local"
+    },
+    "futureChatGPTHook": {
+      "enabled": true,
+      "mode": "mock_local",
+      "functionName": "requestAIGrammarFeedback",
+      "showDynamicTextIn": "feedbackBox",
+      "feedbackVideos": {
+        "question_1_to_3": "try_reading_feedback",
+        "question_4_to_7": "try_again_feedback"
+      }
+    }
   },
-
   "assets": {
     "idle": {
       "type": "gif",
@@ -19,161 +50,138 @@
       "url": "https://res.cloudinary.com/ducmsnybv/image/upload/q_auto/f_auto/v1780372653/idle_new_myvs96.gif",
       "subtitle": ""
     },
-
     "intro": {
       "type": "video",
       "label": "1_intro_C.mp4",
       "url": "https://res.cloudinary.com/ducmsnybv/video/upload/q_auto/f_auto/v1780537658/1_intro_C_ei1pv3.mp4",
       "subtitle": "Hi, my name is Emily and today we'll be conducting your job interview together. Please make yourself comfortable."
     },
-    
     "idleBehavior": {
-    "enabled": true,
-    "delaySeconds": 25,
-    "onlyAfterEmilyStopsTalking": true,
-    "cancelOnUserActivity": true
+      "enabled": true,
+      "delaySeconds": 25,
+      "onlyAfterEmilyStopsTalking": true,
+      "cancelOnUserActivity": true
     },
-
     "q1_video": {
       "type": "video",
       "label": "2_Q1_interested_in.mp4",
       "url": "https://res.cloudinary.com/ducmsnybv/video/upload/q_auto/f_auto/v1780372653/2_Q1_interested_in_s749dv.mp4",
       "subtitle": "What is the position you are interested in?"
     },
-
     "q2_video": {
       "type": "video",
       "label": "3_Q2_academic_background.mp4",
       "url": "https://res.cloudinary.com/ducmsnybv/video/upload/q_auto/f_auto/v1780372653/3_Q2_academic_background_k4vfaq.mp4",
       "subtitle": "Let's start by talking about your academic background. What is your major?"
     },
-
     "q3_video": {
       "type": "video",
       "label": "4_Q3_responsibilities_Good.mp4",
       "url": "https://res.cloudinary.com/ducmsnybv/video/upload/q_auto/f_auto/v1780372655/4_Q3_responsibilities_d1osqb.mp4",
       "subtitle": "Tell me about some responsibilities you have had at school, work or during internships."
     },
-
     "q4_video": {
       "type": "video",
       "label": "5_Q4_activities.mp4",
       "url": "https://res.cloudinary.com/ducmsnybv/video/upload/q_auto/f_auto/v1780372654/5_Q4_activities_jbragk.mp4",
       "subtitle": "What activities are you interested in doing outside of school or work?"
     },
-
     "q5_video": {
       "type": "video",
       "label": "6_Q5_good_at.mp4",
       "url": "https://res.cloudinary.com/ducmsnybv/video/upload/q_auto/f_auto/v1780372654/6_Q5_good_at_pwplre.mp4",
       "subtitle": "What are you good at and what skills do you feel confident about using in a professional environment?"
     },
-
     "q6_video": {
       "type": "video",
       "label": "7_Q6_teamwork_C.mp4",
       "url": "https://res.cloudinary.com/ducmsnybv/video/upload/q_auto/f_auto/v1780537658/7_Q6_teamwork_C_drox7i.mp4",
       "subtitle": "Have you ever worked on a project that required teamwork? Tell me what you have done."
     },
-
     "q7_video": {
       "type": "video",
       "label": "8_Q7_tasks.mp4",
       "url": "https://res.cloudinary.com/ducmsnybv/video/upload/q_auto/f_auto/v1780372655/8_Q7_tasks_pgtcnv.mp4",
       "subtitle": "What kind of tasks are you capable of doing independently?"
     },
-
     "finish": {
       "type": "video",
       "label": "30_wonderful_day.mp4",
       "url": "https://res.cloudinary.com/ducmsnybv/video/upload/q_auto/f_auto/v1780372651/30_woderful_day_limpjr.mp4",
       "subtitle": "Thank you very much for your time today, it was a pleasure speaking with you and we'll be in touch. Have a wonderful day."
     },
-
     "try_again_feedback": {
       "type": "video",
       "label": "11_try_this_instead.mp4",
       "url": "https://res.cloudinary.com/ducmsnybv/video/upload/q_auto/f_auto/v1780372650/11_try_this_instead_p9vkjn.mp4",
       "subtitle": "Try this instead."
     },
-
     "try_reading_feedback": {
       "type": "video",
       "label": "12_try_reading_this.mp4",
       "url": "https://res.cloudinary.com/ducmsnybv/video/upload/q_auto/f_auto/v1780372651/12_try_reading_this_luq4bv.mp4",
       "subtitle": "Try reading this."
     },
-
     "awesome_feedback": {
       "type": "video",
       "label": "21_Awesome.mp4",
       "url": "https://res.cloudinary.com/ducmsnybv/video/upload/q_auto/f_auto/v1780372650/21_Awesome_ehm57k.mp4",
       "subtitle": "It is awesome!"
     },
-
     "doing_great_feedback": {
       "type": "video",
       "label": "22_doing_great.mp4",
       "url": "https://res.cloudinary.com/ducmsnybv/video/upload/q_auto/f_auto/v1780372650/22_doing_great_y75wky.mp4",
       "subtitle": "You're doing great!"
     },
-    
     "cute_feedback": {
-  "type": "video",
-  "label": "23_cute.mp4",
-  "url": "https://res.cloudinary.com/ducmsnybv/video/upload/q_auto/f_auto/v1780372651/23_cute.mp4",
-  "subtitle": "That's cute!"
-},
-
-"excellent_answer_feedback": {
-  "type": "video",
-  "label": "51_excellent_answ.mp4",
-  "url": "https://res.cloudinary.com/ducmsnybv/video/upload/q_auto/f_auto/v1780900136/51_excellent_answ_p3pdku.mp4",
-  "subtitle": "That's right excellent answer!"
-},
-
-"excellent_thumbs_feedback": {
-  "type": "video",
-  "label": "28_EXCELLENT_thumbsUp.mp4",
-  "url": "https://res.cloudinary.com/ducmsnybv/video/upload/q_auto/f_auto/v1780372651/28_EXCELLENT_thumbsUp_u15tjb.mp4",
-  "subtitle": "Excellent answer."
-},
-
+      "type": "video",
+      "label": "23_cute.mp4",
+      "url": "https://res.cloudinary.com/ducmsnybv/video/upload/q_auto/f_auto/v1780372651/23_cute.mp4",
+      "subtitle": "That's cute!"
+    },
+    "excellent_answer_feedback": {
+      "type": "video",
+      "label": "51_excellent_answ.mp4",
+      "url": "https://res.cloudinary.com/ducmsnybv/video/upload/q_auto/f_auto/v1780900136/51_excellent_answ_p3pdku.mp4",
+      "subtitle": "That's right excellent answer!"
+    },
+    "excellent_thumbs_feedback": {
+      "type": "video",
+      "label": "28_EXCELLENT_thumbsUp.mp4",
+      "url": "https://res.cloudinary.com/ducmsnybv/video/upload/q_auto/f_auto/v1780372651/28_EXCELLENT_thumbsUp_u15tjb.mp4",
+      "subtitle": "Excellent answer."
+    },
     "clarify_feedback": {
       "type": "video",
       "label": "25_clarify.mp4",
       "url": "https://res.cloudinary.com/ducmsnybv/video/upload/q_auto/f_auto/v1780372651/25_clarify_mspztx.mp4",
       "subtitle": "Could you clarify that?"
     },
-
     "profanity_warning": {
       "type": "video",
       "label": "26_be_respectful.mp4",
       "url": "https://res.cloudinary.com/ducmsnybv/video/upload/q_auto/f_auto/v1780372651/26_be_respectful_kdujrz.mp4",
       "subtitle": "Please use respectful language during the interview. Let's return to the interview questions."
     },
-
     "english_warning": {
       "type": "video",
       "label": "40_english.mp4",
       "url": "https://res.cloudinary.com/ducmsnybv/video/upload/q_auto/f_auto/v1780372652/40_english_dxpzme.mp4",
       "subtitle": "Oh, would you mind saying it in English?"
     },
-
     "english_practice": {
       "type": "video",
       "label": "41_no_spanish.mp4",
       "url": "https://res.cloudinary.com/ducmsnybv/video/upload/q_auto/f_auto/v1780372652/41_no_spanish_frvf0e.mp4",
       "subtitle": "I do understand Spanish, but you are here to practice English language!"
     },
-
     "off_topic_1": {
       "type": "video",
       "label": "42_off_topic_1.mp4",
       "url": "https://res.cloudinary.com/ducmsnybv/video/upload/q_auto/f_auto/v1780372652/42_off_topic_1_rszdkm.mp4",
       "subtitle": "We can come back later to that topic. For now let's focus on the main objective, please."
     },
-
     "off_topic_2": {
       "type": "video",
       "label": "43_off_topic_2.mp4",
@@ -181,293 +189,359 @@
       "subtitle": "That's an interesting topic. For now let's focus on the main objective, please."
     }
   },
-
   "interviewFlow": {
     "title": "Emily Interview Coach - Seven Question Flow",
-    "startSequence": ["idle", "intro", "question_1"],
-    "endSequence": ["finish", "idle"],
-
+    "startSequence": [
+      "idle",
+      "intro",
+      "question_1"
+    ],
+    "endSequence": [
+      "finish",
+      "idle"
+    ],
     "questions": [
-  {
-    "id": "question_1",
-    "progressStep": 1,
-    "upperStatusText": "Desired job position",
-    "question": "What is the position you are interested in?",
-    "hint": "Wait and listen carefully before answering. Use “interested in + verb-ing”.",
-    "caption": "What is the position you are interested in?",
-    "modelingAnswer": "I am interested in working as an engineer because I enjoy solving technical problems.",
-    "placeholder": "Example: I am interested in working as an engineer because I enjoy solving technical problems.",
-    "video": "q1_video",
-    "audio": "What is the position you are interested in?",
-    "evaluationCriteria": {
-      "minWords": 4,
-      "expectedAnswerType": "job_position",
-      "requiredElements": ["job position or professional area", "complete sentence"],
-      "acceptablePatterns": [
-        "i am interested in",
-        "i want to work as",
-        "i would like to work as"
-      ],
-      "keywords": ["lawyer", "accountant", "manager", "assistant", "finance", "marketing", "human resources", "engineer"]
-    },
-    
-"feedbackMap": {
-  "good_answer": "excellent_answer_feedback",
-  "excellent_answer": "excellent_answer_feedback",
-  "partial_answer": "try_reading_feedback",
-  "too_short": "try_again_feedback",
-  "empty_answer": "try_again_feedback"
-},
-"feedbackText": {
-  "good_answer": "That's right. Excellent answer! Let's continue.",
-  "excellent_answer": "That's right. Excellent answer! Let's continue.",
-  "partial_answer": "Good effort. Try reading the model answer and say it again.",
-  "too_short": "Please repeat. Can you elaborate a little more?",
-  "empty_answer": "Please write or say your answer."
-},
-    "next": "question_2"
-  },
-  {
-    "id": "question_2",
-    "progressStep": 2,
-    "upperStatusText": "Academic background",
-    "question": "What is your major?",
-    "hint": "Mention your major or bachelor’s degree and how long you have studied it.",
-    "caption": "Let's start by talking about your academic background. What is your major?",
-    "modelingAnswer": "I have majored in law for three years.",
-    "placeholder": "Example: I have majored in law for three years.",
-    "video": "q2_video",
-    "audio": "Let's start by talking about your academic background. What is your major?",
-    "evaluationCriteria": {
-      "minWords": 4,
-      "expectedAnswerType": "academic_background",
-      "requiredElements": ["major", "academic program"],
-      "acceptablePatterns": [
-        "i have majored in",
-        "i am studying",
-        "my major is",
-        "i study",
-        "i am a student of"
-      ],
-      "keywords": ["law", "accounting", "business administration", "tourism", "marketing", "engineering"]
-    },
-"feedbackMap": {
-  "good_answer": "awesome_feedback",
-  "excellent_answer": "awesome_feedback",
-  "partial_answer": "try_reading_feedback",
-  "too_short": "try_again_feedback",
-  "empty_answer": "try_again_feedback"
-},
-"feedbackText": {
-  "good_answer": "It is awesome! Let's continue.",
-  "excellent_answer": "It is awesome! Let's continue.",
-  "partial_answer": "Good effort. Try reading the model answer and say it again.",
-  "too_short": "Please repeat. Can you elaborate a little more?",
-  "empty_answer": "Please write or say your answer."
-},
-    "next": "question_3"
-  },
-  {
-    "id": "question_3",
-    "progressStep": 3,
-    "upperStatusText": "Previous responsibilities",
-    "question": "Tell me about some responsibilities you have had at school, work or during internships.",
-    "hint": "Use present perfect to describe responsibilities, projects, or experience.",
-    "caption": "Tell me about some responsibilities you have had at school, work or during internships.",
-    "modelingAnswer": "I have been in charge of organizing small school events and coordinating teamwork activities.",
-    "placeholder": "Example: I have been in charge of organizing small school events and coordinating teamwork activities.",
-    "video": "q3_video",
-    "audio": "Tell me about some responsibilities you have had at school, work or during internships.",
-    "evaluationCriteria": {
-      "minWords": 6,
-      "expectedAnswerType": "responsibilities",
-      "requiredElements": ["responsibility", "school/work/internship context"],
-      "acceptablePatterns": [
-        "i have",
-        "i have been in charge of",
-        "i was responsible for",
-        "i helped with",
-        "i worked on"
-      ],
-      "keywords": ["reports", "documents", "customers", "team", "project", "records", "files", "sales", "events", "coordinating"]
-    },
-"feedbackMap": {
-  "good_answer": "doing_great_feedback",
-  "excellent_answer": "doing_great_feedback",
-  "partial_answer": "try_reading_feedback",
-  "too_short": "try_again_feedback",
-  "empty_answer": "try_again_feedback"
-},
-"feedbackText": {
-  "good_answer": "You're doing great! Let's continue.",
-  "excellent_answer": "You're doing great! Let's continue.",
-  "partial_answer": "Good effort. Try reading the model answer and say it again.",
-  "too_short": "Please repeat. Can you elaborate a little more?",
-  "empty_answer": "Please write or say your answer."
-},
-    "next": "question_4"
-  },
-  {
-    "id": "question_4",
-    "progressStep": 4,
-    "upperStatusText": "Activities outside work",
-    "question": "What activities are you interested in doing outside of school or work?",
-    "hint": "Use “interested in + verb-ing” to talk about hobbies or personal interests.",
-    "caption": "What activities are you interested in doing outside of school or work?",
-    "modelingAnswer": "I am interested in learning French and swimming in my free time.",
-    "placeholder": "Example: I am interested in learning French and swimming in my free time.",
-    "video": "q4_video",
-    "audio": "What activities are you interested in doing outside of school or work?",
-    "evaluationCriteria": {
-      "minWords": 5,
-      "expectedAnswerType": "personal_activities",
-      "requiredElements": ["activity", "interest"],
-      "acceptablePatterns": [
-        "i am interested in",
-        "i like",
-        "i enjoy",
-        "i usually"
-      ],
-      "keywords": ["reading", "exercise", "sports", "music", "family", "learning", "traveling", "cooking", "swimming", "french"]
-    },
-"feedbackMap": {
-  "good_answer": "excellent_thumbs_feedback",
-  "excellent_answer": "excellent_thumbs_feedback",
-  "partial_answer": "try_again_feedback",
-  "too_short": "try_again_feedback",
-  "empty_answer": "try_again_feedback"
-},
-"feedbackText": {
-  "good_answer": "Excellent answer. Let's continue.",
-  "excellent_answer": "Excellent answer. Let's continue.",
-  "partial_answer": "Try this instead. Make your answer clearer and more complete.",
-  "too_short": "Please repeat. Can you elaborate a little more?",
-  "empty_answer": "Please write or say your answer."
-},
-    "next": "question_5"
-  },
-  {
-    "id": "question_5",
-    "progressStep": 5,
-    "upperStatusText": "Your strengths",
-    "question": "What are you good at and what skills do you feel confident about using in a professional environment?",
-    "hint": "Use “good at + noun / verb-ing” to describe your skills and strengths.",
-    "caption": "What are you good at and what skills do you feel confident about using in a professional environment?",
-    "modelingAnswer": "I am good at programming apps and solving technical problems.",
-    "placeholder": "Example: I am good at programming apps and solving technical problems.",
-    "video": "q5_video",
-    "audio": "What are you good at and what skills do you feel confident about using in a professional environment?",
-    "evaluationCriteria": {
-      "minWords": 6,
-      "expectedAnswerType": "strengths",
-      "requiredElements": ["strength", "professional skill"],
-      "acceptablePatterns": [
-        "i am good at",
-        "i feel confident about",
-        "i can",
-        "i am skilled at"
-      ],
-      "keywords": ["communication", "organization", "teamwork", "problem solving", "leadership", "responsibility", "technology", "programming", "apps"]
-    },
-"feedbackMap": {
-  "good_answer": "cute_feedback",
-  "excellent_answer": "cute_feedback",
-  "partial_answer": "try_again_feedback",
-  "too_short": "try_again_feedback",
-  "empty_answer": "try_again_feedback"
-},
-"feedbackText": {
-  "good_answer": "That's cute! Let's continue.",
-  "excellent_answer": "That's cute! Let's continue.",
-  "partial_answer": "Try this instead. Make your answer clearer and more complete.",
-  "too_short": "Please repeat. Can you elaborate a little more?",
-  "empty_answer": "Please write or say your answer."
-},
-    "next": "question_6"
-  },
-  {
-    "id": "question_6",
-    "progressStep": 6,
-    "upperStatusText": "Working in teams",
-    "question": "Have you ever worked on a project that required teamwork? Tell me what you have done.",
-    "hint": "Use present perfect to describe teamwork experience and achievements.",
-    "caption": "Have you ever worked on a project that required teamwork? Tell me what you have done.",
-    "modelingAnswer": "Yes, I have been a team leader and have coordinated group projects at school.",
-    "placeholder": "Example: Yes, I have been a team leader and have coordinated group projects at school.",
-    "video": "q6_video",
-    "audio": "Have you ever worked on a project that required teamwork? Tell me what you have done.",
-    "evaluationCriteria": {
-      "minWords": 8,
-      "expectedAnswerType": "teamwork_experience",
-      "requiredElements": ["team project", "personal contribution"],
-      "acceptablePatterns": [
-        "yes, i have",
-        "i have worked",
-        "i have been",
-        "i have coordinated",
-        "i helped",
-        "my role was"
-      ],
-      "keywords": ["team", "project", "classmates", "coworkers", "organized", "helped", "presented", "planned", "leader", "coordinated"]
-    },
-"feedbackMap": {
-  "good_answer": "excellent_answer_feedback",
-  "excellent_answer": "excellent_answer_feedback",
-  "partial_answer": "try_reading_feedback",
-  "too_short": "try_again_feedback",
-  "empty_answer": "try_again_feedback"
-},
-"feedbackText": {
-  "good_answer": "That's right. Excellent answer! Let's continue.",
-  "excellent_answer": "That's right. Excellent answer! Let's continue.",
-  "partial_answer": "Good effort. Try reading the model answer and say it again.",
-  "too_short": "Please repeat. Can you elaborate a little more?",
-  "empty_answer": "Please write or say your answer."
-},
-    "next": "question_7"
-  },
-  {
-    "id": "question_7",
-    "progressStep": 7,
-    "upperStatusText": "Independent work",
-    "question": "What kind of tasks are you capable of doing independently?",
-    "hint": "Use “able to” to describe independent work skills and professional abilities.",
-    "caption": "What kind of tasks are you capable of doing independently?",
-    "modelingAnswer": "I am able to work under pressure, manage my time effectively, and complete tasks independently.",
-    "placeholder": "Example: I am able to work under pressure, manage my time effectively, and complete tasks independently.",
-    "video": "q7_video",
-    "audio": "What kind of tasks are you capable of doing independently?",
-    "evaluationCriteria": {
-      "minWords": 6,
-      "expectedAnswerType": "independent_work",
-      "requiredElements": ["task", "independent ability"],
-      "acceptablePatterns": [
-        "i am able to",
-        "i am capable of",
-        "i can",
-        "i can work independently"
-      ],
-      "keywords": ["reports", "files", "emails", "documents", "research", "analysis", "customer service", "planning", "pressure", "time", "tasks"]
-    },
-"feedbackMap": {
-  "good_answer": "doing_great_feedback",
-  "excellent_answer": "doing_great_feedback",
-  "partial_answer": "try_reading_feedback",
-  "too_short": "try_again_feedback",
-  "empty_answer": "try_again_feedback"
-},
-"feedbackText": {
-  "good_answer": "You're doing great! Let's continue.",
-  "excellent_answer": "You're doing great! Let's continue.",
-  "partial_answer": "Good effort. Try reading the model answer and say it again.",
-  "too_short": "Please repeat. Can you elaborate a little more?",
-  "empty_answer": "Please write or say your answer."
-},
-    "next": "finish"
-  }
+      {
+        "id": "question_1",
+        "progressStep": 1,
+        "upperStatusText": "Desired job position",
+        "question": "What is the position you are interested in?",
+        "hint": "Wait and listen carefully before answering. Use “interested in + verb-ing”.",
+        "caption": "What is the position you are interested in?",
+        "modelingAnswer": "I am interested in working as an engineer because I enjoy solving technical problems.",
+        "placeholder": "Example: I am interested in working as an engineer because I enjoy solving technical problems.",
+        "video": "q1_video",
+        "audio": "What is the position you are interested in?",
+        "evaluationCriteria": {
+          "minWords": 4,
+          "expectedAnswerType": "job_position",
+          "requiredElements": [
+            "job position or professional area",
+            "complete sentence"
+          ],
+          "acceptablePatterns": [
+            "i am interested in",
+            "i want to work as",
+            "i would like to work as"
+          ],
+          "semanticCategories": [
+          "job_position",
+          "professional_area",
+          "career_interest",
+          "study_field"
+         ]
+        },
+        "feedbackMap": {
+          "good_answer": "excellent_answer_feedback",
+          "excellent_answer": "excellent_answer_feedback",
+          "partial_answer": "try_reading_feedback",
+          "too_short": "try_again_feedback",
+          "empty_answer": "try_again_feedback"
+        },
+        "feedbackText": {
+          "good_answer": "That's right. Excellent answer! Let's continue.",
+          "excellent_answer": "That's right. Excellent answer! Let's continue.",
+          "partial_answer": "Good effort. Try reading the model answer and say it again.",
+          "too_short": "Please repeat. Can you elaborate a little more?",
+          "empty_answer": "Please write or say your answer."
+        },
+        "next": "question_2"
+      },
+      {
+        "id": "question_2",
+        "progressStep": 2,
+        "upperStatusText": "Academic background",
+        "question": "What is your major?",
+        "hint": "Mention your major or bachelor’s degree and how long you have studied it.",
+        "caption": "Let's start by talking about your academic background. What is your major?",
+        "modelingAnswer": "I have majored in law for three years.",
+        "placeholder": "Example: I have majored in law for three years.",
+        "video": "q2_video",
+        "audio": "Let's start by talking about your academic background. What is your major?",
+        "evaluationCriteria": {
+          "minWords": 4,
+          "expectedAnswerType": "academic_background",
+          "requiredElements": [
+            "major_or_degree",
+            "academic_program_or_school",
+            "duration_of_study",
+            "career_interest_or_reason_for_studying"
+          ],
+          "acceptablePatterns": [
+  "i have majored in",
+  "i am majoring in",
+  "i am studying",
+  "my major is",
+  "i study",
+  "i am a student of",
+  "i have a bachelor's degree in",
+  "i have a bachelor degree in",
+  "my bachelor's degree is in",
+  "my bachelor degree is in",
+  "i have a degree in",
+  "i am in the",
+  "i am enrolled in"
+],
+         "semanticCategories": [
+  "academic_field",
+  "university_major",
+  "degree_program"
 ]
+        },
+        "feedbackMap": {
+          "good_answer": "awesome_feedback",
+          "excellent_answer": "awesome_feedback",
+          "partial_answer": "try_reading_feedback",
+          "too_short": "try_again_feedback",
+          "empty_answer": "try_again_feedback"
+        },
+        "feedbackText": {
+          "good_answer": "It is awesome! Let's continue.",
+          "excellent_answer": "It is awesome! Let's continue.",
+          "partial_answer": "Good effort. Try reading the model answer and say it again.",
+          "too_short": "Please repeat. Can you elaborate a little more?",
+          "empty_answer": "Please write or say your answer."
+        },
+        "next": "question_3"
+      },
+      {
+        "id": "question_3",
+        "progressStep": 3,
+        "upperStatusText": "Previous responsibilities",
+        "question": "Tell me about some responsibilities you have had at school, work or during internships.",
+        "hint": "Use present perfect to describe responsibilities, projects, or experience.",
+        "caption": "Tell me about some responsibilities you have had at school, work or during internships.",
+        "modelingAnswer": "I have been in charge of organizing small school events and coordinating teamwork activities.",
+        "placeholder": "Example: I have been in charge of organizing small school events and coordinating teamwork activities.",
+        "video": "q3_video",
+        "audio": "Tell me about some responsibilities you have had at school, work or during internships.",
+        "evaluationCriteria": {
+          "minWords": 6,
+          "expectedAnswerType": "responsibilities",
+          "requiredElements": [
+            "responsibility",
+            "school/work/internship context"
+          ],
+          "acceptablePatterns": [
+            "i have",
+            "i have been in charge of",
+            "i was responsible for",
+            "i helped with",
+            "i worked on"
+          ],
+          "semanticCategories": [
+            "responsibility",
+            "school_context",
+            "work_context",
+            "academic_field",
+            "internship_context",
+            "sports_or_extracurricular_context"
+          ]
+        },
+        "feedbackMap": {
+          "good_answer": "doing_great_feedback",
+          "excellent_answer": "doing_great_feedback",
+          "partial_answer": "try_reading_feedback",
+          "too_short": "try_again_feedback",
+          "empty_answer": "try_again_feedback"
+        },
+        "feedbackText": {
+          "good_answer": "You're doing great! Let's continue.",
+          "excellent_answer": "You're doing great! Let's continue.",
+          "partial_answer": "Good effort. Try reading the model answer and say it again.",
+          "too_short": "Please repeat. Can you elaborate a little more?",
+          "empty_answer": "Please write or say your answer."
+        },
+        "next": "question_4"
+      },
+      {
+        "id": "question_4",
+        "progressStep": 4,
+        "upperStatusText": "Activities outside work",
+        "question": "What activities are you interested in doing outside of school or work?",
+        "hint": "Use “interested in + verb-ing” to talk about hobbies or personal interests.",
+        "caption": "What activities are you interested in doing outside of school or work?",
+        "modelingAnswer": "I am interested in learning French and swimming in my free time.",
+        "placeholder": "Example: I am interested in learning French and swimming in my free time.",
+        "video": "q4_video",
+        "audio": "What activities are you interested in doing outside of school or work?",
+        "evaluationCriteria": {
+          "minWords": 5,
+          "expectedAnswerType": "personal_activities",
+          "requiredElements": [
+            "activity",
+            "interest"
+          ],
+          "acceptablePatterns": [
+            "i am interested in",
+            "i like",
+            "i enjoy",
+            "i usually"
+          ],
+          "semanticCategories": [
+  "personal_activity",
+  "hobby_or_interest",
+  "sports_or_extracurricular_context"
+]
+        },
+        "feedbackMap": {
+          "good_answer": "excellent_thumbs_feedback",
+          "excellent_answer": "excellent_thumbs_feedback",
+          "partial_answer": "try_again_feedback",
+          "too_short": "try_again_feedback",
+          "empty_answer": "try_again_feedback"
+        },
+        "feedbackText": {
+          "good_answer": "Excellent answer. Let's continue.",
+          "excellent_answer": "Excellent answer. Let's continue.",
+          "partial_answer": "Try this instead. Make your answer clearer and more complete.",
+          "too_short": "Please repeat. Can you elaborate a little more?",
+          "empty_answer": "Please write or say your answer."
+        },
+        "next": "question_5"
+      },
+      {
+        "id": "question_5",
+        "progressStep": 5,
+        "upperStatusText": "Your strengths",
+        "question": "What are you good at and what skills do you feel confident about using in a professional environment?",
+        "hint": "Use “good at + noun / verb-ing” to describe your skills and strengths.",
+        "caption": "What are you good at and what skills do you feel confident about using in a professional environment?",
+        "modelingAnswer": "I am good at programming apps and solving technical problems.",
+        "placeholder": "Example: I am good at programming apps and solving technical problems.",
+        "video": "q5_video",
+        "audio": "What are you good at and what skills do you feel confident about using in a professional environment?",
+        "evaluationCriteria": {
+          "minWords": 6,
+          "expectedAnswerType": "strengths",
+          "requiredElements": [
+            "strength",
+            "professional skill"
+          ],
+          "acceptablePatterns": [
+            "i am good at",
+            "i feel confident about",
+            "i can",
+            "i am skilled at"
+          ],
+          "semanticCategories": [
+            "professional_skill",
+            "professional_ability",
+            "craft_or_hobby_skill"
+          ]
+        },
+        "feedbackMap": {
+          "good_answer": "cute_feedback",
+          "excellent_answer": "cute_feedback",
+          "partial_answer": "try_again_feedback",
+          "too_short": "try_again_feedback",
+          "empty_answer": "try_again_feedback"
+        },
+        "feedbackText": {
+          "good_answer": "That's cute! Let's continue.",
+          "excellent_answer": "That's cute! Let's continue.",
+          "partial_answer": "Try this instead. Make your answer clearer and more complete.",
+          "too_short": "Please repeat. Can you elaborate a little more?",
+          "empty_answer": "Please write or say your answer."
+        },
+        "next": "question_6"
+      },
+      {
+        "id": "question_6",
+        "progressStep": 6,
+        "upperStatusText": "Working in teams",
+        "question": "Have you ever worked on a project that required teamwork? Tell me what you have done.",
+        "hint": "Use present perfect to describe teamwork experience and achievements.",
+        "caption": "Have you ever worked on a project that required teamwork? Tell me what you have done.",
+        "modelingAnswer": "Yes, I have been a team leader and have coordinated group projects at school.",
+        "placeholder": "Example: Yes, I have been a team leader and have coordinated group projects at school.",
+        "video": "q6_video",
+        "audio": "Have you ever worked on a project that required teamwork? Tell me what you have done.",
+        "evaluationCriteria": {
+          "minWords": 8,
+          "expectedAnswerType": "teamwork_experience",
+          "requiredElements": [
+            "team project",
+            "personal contribution"
+          ],
+          "acceptablePatterns": [
+            "yes, i have",
+            "i have worked",
+            "i have been",
+            "i have coordinated",
+            "i helped",
+            "my role was"
+          ],
+          "semanticCategories": [
+  "teamwork_experience",
+  "school_context",
+  "work_context"
+]
+        },
+        "feedbackMap": {
+          "good_answer": "excellent_answer_feedback",
+          "excellent_answer": "excellent_answer_feedback",
+          "partial_answer": "try_again_feedback",
+          "too_short": "try_again_feedback",
+          "empty_answer": "try_again_feedback"
+        },
+        "feedbackText": {
+          "good_answer": "That's right. Excellent answer! Let's continue.",
+          "excellent_answer": "That's right. Excellent answer! Let's continue.",
+          "partial_answer": "Try this instead. Make your answer clearer and more complete.",
+          "too_short": "Please repeat. Can you elaborate a little more?",
+          "empty_answer": "Please write or say your answer."
+        },
+        "next": "question_7"
+      },
+      {
+        "id": "question_7",
+        "progressStep": 7,
+        "upperStatusText": "Independent work",
+        "question": "What kind of tasks are you capable of doing independently?",
+        "hint": "Use “able to” to describe independent work skills and professional abilities.",
+        "caption": "What kind of tasks are you capable of doing independently?",
+        "modelingAnswer": "I am able to work under pressure, manage my time effectively, and complete tasks independently.",
+        "placeholder": "Example: I am able to work under pressure, manage my time effectively, and complete tasks independently.",
+        "video": "q7_video",
+        "audio": "What kind of tasks are you capable of doing independently?",
+        "evaluationCriteria": {
+          "minWords": 6,
+          "expectedAnswerType": "independent_work",
+          "requiredElements": [
+            "task",
+            "independent ability"
+          ],
+          "acceptablePatterns": [
+            "i am able to",
+            "i am capable of",
+            "i can",
+            "i can work independently"
+          ],
+          "semanticCategories": [
+  "independent_task",
+  "task_management",
+  "professional_ability"
+]
+        },
+        "feedbackMap": {
+          "good_answer": "doing_great_feedback",
+          "excellent_answer": "doing_great_feedback",
+          "partial_answer": "try_again_feedback",
+          "too_short": "try_again_feedback",
+          "empty_answer": "try_again_feedback"
+        },
+        "feedbackText": {
+          "good_answer": "You're doing great! Let's continue.",
+          "excellent_answer": "You're doing great! Let's continue.",
+          "partial_answer": "Try this instead. Make your answer clearer and more complete.",
+          "too_short": "Please repeat. Can you elaborate a little more?",
+          "empty_answer": "Please write or say your answer."
+        },
+        "next": "finish"
+      }
+    ]
   },
-
   "behaviorRules": {
     "priorityOrder": [
       "profanity_detected",
@@ -479,17 +553,22 @@
       "good_answer",
       "excellent_answer"
     ],
-
     "profanity": {
       "enabled": true,
-      "list": ["fuck", "fucking", "shit", "bitch", "asshole", "damn"],
+      "list": [
+        "fuck",
+        "fucking",
+        "shit",
+        "bitch",
+        "asshole",
+        "damn"
+      ],
       "action": {
         "video": "profanity_warning",
         "statusText": "Please use professional language.",
         "stayOnCurrentQuestion": true
       }
     },
-
     "spanishUse": {
       "enabled": true,
       "maxWarnings": 2,
@@ -507,7 +586,6 @@
       ],
       "stayOnCurrentQuestion": true
     },
-
     "offTopic": {
       "enabled": true,
       "maxWarnings": 3,
@@ -531,7 +609,6 @@
       "terminationAfter": 4,
       "terminationMessage": "Alright, I am stopping the interview here. This session is officially over."
     },
-
     "answerQuality": {
       "empty_answer": {
         "video": "try_again_feedback",
@@ -560,7 +637,6 @@
       }
     }
   },
-
   "uiStates": {
     "beforeInterviewStarts": {
       "interactionMode": "idle",
@@ -579,7 +655,6 @@
       "listeningState": false,
       "submitState": "disabled"
     },
-
     "interviewInProgress": {
       "interactionMode": "active_interview",
       "buttons": {
@@ -597,7 +672,6 @@
       "listeningState": "available",
       "submitState": "enabled"
     },
-
     "finalInterviewState": {
       "interactionMode": "completed",
       "buttons": {
@@ -617,7 +691,6 @@
       "submitState": "disabled"
     }
   },
-
   "legacyCompatibility": {
     "interview": {
       "questionsSource": "interviewFlow.questions",

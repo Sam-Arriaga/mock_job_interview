@@ -142,21 +142,40 @@ button:disabled {
 
 .upper-text-area,
 .feedback-box {
-  min-height: 28px;
-  max-height: 36px;
-  overflow: hidden;
-  padding: 2px 10px;
+  min-height: 34px;
+
+  /* CAMBIO IMPORTANTE */
+  max-height: 88px;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  padding: 4px 12px;
+
   text-align: center;
   font-size: 15px;
   font-weight: 700;
   line-height: 1.45;
+
   color: var(--blue);
+
   background: transparent;
   border: none;
   box-shadow: none;
+
   letter-spacing: 0.01em;
+
   opacity: 1;
-  transition: opacity 0.28s ease, transform 0.28s ease, color 0.28s ease;
+
+  transition:
+    opacity 0.28s ease,
+    transform 0.28s ease,
+    color 0.28s ease;
+}
+
+.feedback-box {
+  word-wrap: break-word;
+  white-space: normal;
 }
 
 .upper-text-area.fade-out,
