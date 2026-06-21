@@ -64,7 +64,7 @@
             </video>
           </div>
         </section>
-        
+
         <section id="captionPanel" class="caption-panel">
          <p id="captionText">Click Start to begin.</p>
         </section>
@@ -76,17 +76,20 @@
             placeholder="Type your answer here if needed…"></textarea>
         </section>
 
+        <!-- MOVED: action-bar now lives inside interview-content so it can
+             join the video/caption/answer grid on tablet & desktop.
+             On mobile it still renders last, full width, exactly as before. -->
+        <nav class="action-bar" aria-label="Interview controls">
+          <button id="backBtn" class="action-btn">⬅️<span>Back</span></button>
+          <button id="clearBtn" class="action-btn">🧹<span>Clear</span></button>
+          <button id="speakBtn" class="action-btn speak">🎤<span>Speak</span></button>
+          <button id="submitBtn" class="action-btn">✅<span>Submit</span></button>
+          <button id="nextBtn" class="action-btn primary">➡️<span>Start</span></button>
+        </nav>
+
       </section>
 
     </main>
-
-    <nav class="action-bar" aria-label="Interview controls">
-      <button id="backBtn" class="action-btn">⬅️<span>Back</span></button>
-      <button id="clearBtn" class="action-btn">🧹<span>Clear</span></button>
-      <button id="speakBtn" class="action-btn speak">🎤<span>Speak</span></button>
-      <button id="submitBtn" class="action-btn">✅<span>Submit</span></button>
-      <button id="nextBtn" class="action-btn primary">➡️<span>Start</span></button>
-    </nav>
 
   </div>
 

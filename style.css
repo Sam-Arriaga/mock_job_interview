@@ -62,7 +62,10 @@ button:disabled {
   width: 100%;
   height: 100dvh;
   display: grid;
-  grid-template-rows: var(--header-h) 1fr var(--action-h);
+  /* NOTE: was 3 rows (header / content / action-bar) when the action bar
+     lived at the top level. It now lives inside .interview-content, so the
+     shell only needs 2 rows. Visual result on mobile is unchanged. */
+  grid-template-rows: var(--header-h) 1fr;
   background: linear-gradient(180deg, #f6fbff 0%, #eef5fb 48%, #e9f1f8 100%);
 }
 
@@ -143,8 +146,6 @@ button:disabled {
 .upper-text-area,
 .feedback-box {
   min-height: 34px;
-
-  /* CAMBIO IMPORTANTE */
   max-height: 88px;
 
   overflow-y: auto;
@@ -191,11 +192,14 @@ button:disabled {
 }
 
 /* INTERVIEW CONTENT */
+/* Mobile: 4 stacked rows — video / caption / answer / action-bar.
+   (The action-bar used to be a separate row of the whole app shell;
+   it now lives here so it can become a grid item on wider screens.) */
 
 .interview-content {
   min-height: 0;
   display: grid;
-  grid-template-rows: minmax(0, 1fr) auto auto;
+  grid-template-rows: minmax(0, 1fr) auto auto auto;
   gap: 8px;
 }
 
@@ -286,7 +290,7 @@ button:disabled {
 /* ACTION BAR */
 
 .action-bar {
-  height: var(--action-h);
+  min-height: var(--action-h);
   background: rgba(255, 255, 255, 0.96);
   border-top: 1px solid var(--border);
   display: grid;
@@ -398,6 +402,8 @@ button:disabled {
 }
 
 /* MENU MODAL */
+/* Unchanged at every breakpoint, by design: stays a bottom-sheet overlay
+   on mobile, tablet, and desktop. */
 
 .menu-overlay {
   position: fixed;
@@ -580,30 +586,174 @@ button:disabled {
   }
 }
 
-/* DESKTOP REFINEMENT */
+/* =========================================================
+   TABLET — 768px to 1023px
+   The video, caption box, textarea and action bar become a
+   two-column layout: video on the left, controls stacked on
+   the right. Header / progress dots / feedback text stay
+   full width above the split, exactly like the mockup.
+========================================================= */
 
 @media (min-width: 768px) {
   body {
-    display: flex;
-    justify-content: center;
-    background: #dbe3ef;
+    overflow: auto;
   }
 
-  .app-shell {
-    max-width: 430px;
-    height: 100dvh;
-    box-shadow: 0 0 40px rgba(15, 23, 42, 0.22);
+  .coach-screen {
+    padding: 16px 24px 20px;
+    gap: 14px;
+  }
+
+  .upper-text-area,
+  .feedback-box {
+    font-size: 16px;
+    max-height: none;
+  }
+
+  .progress-dots {
+    width: min(70vw, 480px);
+  }
+
+  .interview-content {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    grid-template-rows: auto auto 1fr;
+    grid-template-areas:
+      "video    caption"
+      "video    answer"
+      "video    actions";
+    gap: 14px;
+    align-items: start;
+  }
+
+  .video-area {
+    grid-area: video;
+    height: 100%;
+    align-self: stretch;
   }
 
   .video-card {
-    max-height: 42dvh;
+    height: 100%;
+    min-height: 360px;
+    max-height: 60dvh;
   }
 
-  .app-logo {
-    display: block;
+  .caption-panel {
+    grid-area: caption;
+    max-height: none;
+  }
+
+  .answer-area {
+    grid-area: answer;
   }
 
   .answer-input {
-    height: 64px;
+    height: 120px;
+    font-size: 15px;
+  }
+
+  .action-bar {
+    grid-area: actions;
+    align-self: end;
+    border-top: none;
+    box-shadow: none;
+    background: transparent;
+    padding: 0;
+    min-height: 0;
+  }
+
+  .action-btn {
+    height: 58px;
+    border-radius: 16px;
+    font-size: 19px;
+  }
+
+  .action-btn span {
+    font-size: 12px;
+  }
+}
+
+/* =========================================================
+   DESKTOP — 1024px and up
+   Same two-column shape as tablet, but the whole app gets
+   more room to breathe: wider shell, larger video, larger
+   type, larger buttons. The 430px mobile-card ceiling is
+   removed entirely.
+========================================================= */
+
+@media (min-width: 1024px) {
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    background: #dbe3ef;
+    padding: 28px 16px;
+  }
+
+  .app-shell {
+    width: 100%;
+    max-width: 1180px;
+    height: auto;
+    min-height: calc(100dvh - 56px);
+    border-radius: 28px;
+    overflow: hidden;
+    box-shadow: 0 30px 80px rgba(15, 23, 42, 0.22);
+  }
+
+  .app-header {
+    padding: 12px 30px;
+  }
+
+  .app-logo {
+    width: 56px;
+    height: 56px;
+  }
+
+  .coach-screen {
+    padding: 22px 36px 30px;
+    gap: 18px;
+  }
+
+  .interview-content {
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    gap: 26px;
+  }
+
+  .video-card {
+    border-radius: 28px;
+    min-height: 420px;
+    max-height: 64dvh;
+  }
+
+  .caption-panel {
+    font-size: 15px;
+    padding: 16px 20px;
+    min-height: 130px;
+    border-radius: 20px;
+  }
+
+  .answer-input {
+    height: 150px;
+    font-size: 16px;
+    padding: 16px 18px;
+    border-radius: 20px;
+  }
+
+  .action-bar {
+    gap: 10px;
+  }
+
+  .action-btn {
+    height: 66px;
+    border-radius: 18px;
+    font-size: 22px;
+  }
+
+  .action-btn span {
+    font-size: 12.5px;
+  }
+
+  .upper-text-area,
+  .feedback-box {
+    font-size: 18px;
   }
 }
