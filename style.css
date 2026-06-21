@@ -256,6 +256,51 @@ button:disabled {
   display: none;
 }
 
+/* QUICK SUPPORT BUTTONS (Repeat/Hint/Captions/Modeling)
+   Hidden on mobile by default — these stay in the hamburger menu there.
+   Tablet/desktop turns this on and fills the empty space with it. */
+
+.support-row {
+  display: none;
+}
+
+.support-btn {
+  height: 44px;
+  border-radius: 14px;
+  background: #edf2f7;
+  color: var(--navy);
+  font-size: 13px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background var(--ease), color var(--ease), box-shadow var(--ease), transform var(--ease);
+}
+
+.support-btn span {
+  font-size: 12.5px;
+}
+
+.support-btn:hover {
+  transform: translateY(-1px);
+}
+
+.support-btn:active {
+  transform: scale(0.97);
+}
+
+.support-btn.active-action {
+  background: var(--gold);
+  color: var(--navy);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.16);
+}
+
+.support-btn.active-repeat {
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+
 /* TEXTAREA */
 
 .answer-area {
@@ -402,8 +447,9 @@ button:disabled {
 }
 
 /* MENU MODAL */
-/* Unchanged at every breakpoint, by design: stays a bottom-sheet overlay
-   on mobile, tablet, and desktop. */
+/* Mobile (<768px): bottom-sheet overlay with a dimmed background.
+   Tablet & desktop (768px+): becomes a corner dropdown anchored near the
+   hamburger button, no dimming — see the breakpoint sections below. */
 
 .menu-overlay {
   position: fixed;
@@ -616,13 +662,15 @@ button:disabled {
 
   .interview-content {
     grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-    /* The middle row (answer) is the flexible one now — it absorbs all
-       leftover height, which keeps the caption box pinned to the video's
-       top edge and the action bar pinned to the video's bottom edge,
-       no matter how tall the video ends up being. */
-    grid-template-rows: auto 1fr auto;
+    /* The answer row is the flexible one — it absorbs all leftover
+       height, which keeps the caption box pinned to the video's top
+       edge and the action bar pinned to the video's bottom edge,
+       no matter how tall the video ends up being. The new "supports"
+       row sits between caption and answer, sized to its own content. */
+    grid-template-rows: auto auto 1fr auto;
     grid-template-areas:
       "video    caption"
+      "video    supports"
       "video    answer"
       "video    actions";
     gap: 14px;
@@ -637,13 +685,22 @@ button:disabled {
   .video-card {
     height: 100%;
     min-height: 360px;
-    max-height: 60dvh;
+    /* No max-height: the frame should always fill the exact space
+       between the caption box and the button row, never float
+       centered with a gap above/below. */
   }
 
   .caption-panel {
     grid-area: caption;
     max-height: none;
     align-self: start;
+  }
+
+  .support-row {
+    grid-area: supports;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
   }
 
   .answer-area {
@@ -676,6 +733,46 @@ button:disabled {
 
   .action-btn span {
     font-size: 12px;
+  }
+
+  /* MENU — becomes a corner dropdown instead of a centered/bottom modal.
+     No dimmed background; it sits just under-right of the hamburger
+     button, like a typical desktop app menu. */
+  .menu-overlay {
+    background: transparent;
+    backdrop-filter: none;
+    align-items: flex-start;
+    justify-content: flex-end;
+    padding: calc(var(--header-h) + 10px) 16px 16px 16px;
+  }
+
+  .side-menu {
+    width: 340px;
+    max-width: 340px;
+    max-height: calc(100dvh - var(--header-h) - 26px);
+    border-radius: 18px;
+    animation: menuDrop 0.18s ease-out;
+  }
+
+  @keyframes menuDrop {
+    from {
+      transform: translateY(-8px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  /* These four now live inline next to the textarea — no need to show
+     them a second time inside the menu. Slow mode stays here, it's a
+     setting, not a per-question support. */
+  #repeatBtn,
+  #hintBtn,
+  #captionsBtn,
+  #modelAnswerBtn {
+    display: none;
   }
 }
 
@@ -728,7 +825,6 @@ button:disabled {
   .video-card {
     border-radius: 28px;
     min-height: 420px;
-    max-height: 64dvh;
   }
 
   .caption-panel {
@@ -743,6 +839,20 @@ button:disabled {
     font-size: 16px;
     padding: 16px 18px;
     border-radius: 20px;
+  }
+
+  .support-row {
+    gap: 10px;
+  }
+
+  .support-btn {
+    height: 50px;
+    border-radius: 16px;
+    font-size: 14px;
+  }
+
+  .support-btn span {
+    font-size: 13.5px;
   }
 
   .action-bar {
@@ -762,5 +872,16 @@ button:disabled {
   .upper-text-area,
   .feedback-box {
     font-size: 18px;
+  }
+
+  /* Keep the corner dropdown anchored to the card's right edge — once the
+     app card stops growing past 1180px, the menu should too, instead of
+     drifting toward the raw browser window edge on very wide monitors. */
+  .menu-overlay {
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: 1180px;
+    margin: 0 auto;
   }
 }

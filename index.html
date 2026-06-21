@@ -69,6 +69,16 @@
          <p id="captionText">Click Start to begin.</p>
         </section>
 
+        <!-- Tablet/desktop-only quick-access copies of Repeat/Hint/Captions/
+             Modeling Answer. Hidden on mobile via CSS — those stay in the
+             hamburger menu there, where this section doesn't exist. -->
+        <section class="support-row" aria-label="Quick learning support">
+          <button id="repeatBtnInline" class="support-btn">🔁<span>Repeat</span></button>
+          <button id="hintBtnInline" class="support-btn">💡<span>Hint</span></button>
+          <button id="captionsBtnInline" class="support-btn">💬<span>Captions</span></button>
+          <button id="modelAnswerBtnInline" class="support-btn">📝<span>Modeling</span></button>
+        </section>
+
         <section class="answer-area">
           <textarea
             id="studentAnswer"

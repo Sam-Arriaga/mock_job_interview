@@ -36,6 +36,14 @@ const slowModeBtn = document.getElementById("slowModeBtn");
 const instructionsBtn = document.getElementById("instructionsBtn");
 const finishBtn = document.getElementById("finishBtn");
 
+// Inline copies of Repeat/Hint/Captions/Modeling — visible in the empty
+// space on tablet/desktop, hidden on mobile (CSS-controlled). Same
+// underlying functions as the menu versions, just a second way to reach them.
+const repeatBtnInline = document.getElementById("repeatBtnInline");
+const hintBtnInline = document.getElementById("hintBtnInline");
+const captionsBtnInline = document.getElementById("captionsBtnInline");
+const modelAnswerBtnInline = document.getElementById("modelAnswerBtnInline");
+
 emilyVideo.playsInline = true;
 
 const interviewUIState = {
@@ -80,6 +88,17 @@ function updateSupportMenuStates() {
       <span>Slow mode</span>
       ${slowModeEnabled ? '<span class="menu-state">ON</span>' : ""}
     `;
+  }
+
+  // Mirror the active state onto the inline buttons (tablet/desktop).
+  if (hintBtnInline) {
+    hintBtnInline.classList.toggle("active-action", activeSupportMode === "hint");
+  }
+  if (captionsBtnInline) {
+    captionsBtnInline.classList.toggle("active-action", activeSupportMode === "captions");
+  }
+  if (modelAnswerBtnInline) {
+    modelAnswerBtnInline.classList.toggle("active-action", activeSupportMode === "model");
   }
 }
 
@@ -1229,6 +1248,14 @@ function repeatQuestion() {
       repeatBtn.classList.remove("active-repeat");
     }, 400);
   }
+
+  if (repeatBtnInline) {
+    repeatBtnInline.classList.add("active-repeat");
+
+    setTimeout(() => {
+      repeatBtnInline.classList.remove("active-repeat");
+    }, 400);
+  }
  }
 
 async function submitAnswer() {
@@ -1690,27 +1717,30 @@ modelAnswerBtn.addEventListener("click", () => {
   showModelAnswer();
   menuOverlay.classList.add("hidden");
 });
+function toggleCaptions() {
+  if (!currentQuestion) return;
+
+  setActiveSupportMode("captions");
+
+  if (activeSupportMode === "captions") {
+    setCaptionText(
+      currentQuestion.caption ||
+      currentQuestion.question ||
+      "No captions available."
+    );
+
+    setFeedbackText("Captions opened.");
+    protectedFeedback = true;
+  } else {
+    setCaptionText("");
+    setFeedbackText("Captions closed.");
+    protectedFeedback = false;
+  }
+}
+
 if (captionsBtn) {
   captionsBtn.addEventListener("click", () => {
-    if (!currentQuestion) return;
-
-    setActiveSupportMode("captions");
-
-    if (activeSupportMode === "captions") {
-      setCaptionText(
-        currentQuestion.caption ||
-        currentQuestion.question ||
-        "No captions available."
-      );
-
-      setFeedbackText("Captions opened.");
-      protectedFeedback = true;
-    } else {
-      setCaptionText("");
-      setFeedbackText("Captions closed.");
-      protectedFeedback = false;
-    }
-
+    toggleCaptions();
     menuOverlay.classList.add("hidden");
   });
 }
@@ -1753,4 +1783,22 @@ if (finishBtn) {
   finishBtn.addEventListener("click", () => {
     confirmAndExitInterview();
   });
+}
+
+/* INLINE SUPPORT BUTTONS (tablet/desktop) — same functions as the menu */
+
+if (repeatBtnInline) {
+  repeatBtnInline.addEventListener("click", repeatQuestion);
+}
+
+if (hintBtnInline) {
+  hintBtnInline.addEventListener("click", showHint);
+}
+
+if (captionsBtnInline) {
+  captionsBtnInline.addEventListener("click", toggleCaptions);
+}
+
+if (modelAnswerBtnInline) {
+  modelAnswerBtnInline.addEventListener("click", showModelAnswer);
 }
