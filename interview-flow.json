@@ -1,6 +1,6 @@
 {
   "project": "SilverClassroom Emily Interview Coach",
-  "version": "3.0",
+  "version": "3.1",
   "mode": "horizontal_16_9",
   "settings": {
     "repeatLimit": 3,
@@ -55,12 +55,6 @@
       "label": "1_intro_C.mp4",
       "url": "https://res.cloudinary.com/ducmsnybv/video/upload/q_auto/f_auto/v1780537658/1_intro_C_ei1pv3.mp4",
       "subtitle": "Hi, my name is Emily and today we'll be conducting your job interview together. Please make yourself comfortable."
-    },
-    "idleBehavior": {
-      "enabled": true,
-      "delaySeconds": 25,
-      "onlyAfterEmilyStopsTalking": true,
-      "cancelOnUserActivity": true
     },
     "q1_video": {
       "type": "video",
@@ -164,6 +158,12 @@
       "url": "https://res.cloudinary.com/ducmsnybv/video/upload/q_auto/f_auto/v1780372651/26_be_respectful_kdujrz.mp4",
       "subtitle": "Please use respectful language during the interview. Let's return to the interview questions."
     },
+    "profanity_warning_c": {
+      "type": "video",
+      "label": "26_be_respectful_C.mp4",
+      "url": "https://res.cloudinary.com/ducmsnybv/video/upload/q_auto/f_auto/v1780537658/26_be_respectful_C_tsumqt.mp4",
+      "subtitle": "Please use respectful language during the interview. Let's return to the interview questions."
+    },
     "english_warning": {
       "type": "video",
       "label": "40_english.mp4",
@@ -191,25 +191,19 @@
   },
   "interviewFlow": {
     "title": "Emily Interview Coach - Seven Question Flow",
-    "startSequence": [
-      "idle",
-      "intro",
-      "question_1"
-    ],
-    "endSequence": [
-      "finish",
-      "idle"
-    ],
+    "startSequence": ["idle", "intro", "question_1"],
+    "endSequence": ["finish", "idle"],
     "questions": [
+
       {
         "id": "question_1",
         "progressStep": 1,
         "upperStatusText": "Desired job position",
         "question": "What is the position you are interested in?",
-        "hint": "Wait and listen carefully before answering. Use “interested in + verb-ing”.",
+        "hint": "interested in working as a '___'",
         "caption": "What is the position you are interested in?",
-        "modelingAnswer": "I am interested in working as an engineer because I enjoy solving technical problems.",
-        "placeholder": "Example: I am interested in working as an engineer because I enjoy solving technical problems.",
+        "modelingAnswer": "I am interested in working as a lawyer.",
+        "placeholder": "Example: I am interested in working as a lawyer.",
         "video": "q1_video",
         "audio": "What is the position you are interested in?",
         "evaluationCriteria": {
@@ -225,37 +219,160 @@
             "i would like to work as"
           ],
           "semanticCategories": [
-          "job_position",
-          "professional_area",
-          "career_interest",
-          "study_field"
-         ]
+            "job_position",
+            "professional_area",
+            "career_interest",
+            "study_field"
+          ]
         },
-        "feedbackMap": {
-          "good_answer": "excellent_answer_feedback",
-          "excellent_answer": "excellent_answer_feedback",
-          "partial_answer": "try_reading_feedback",
-          "too_short": "try_again_feedback",
-          "empty_answer": "try_again_feedback"
+        "contextualHints": {
+          "profanity": {
+            "hint": "interested in working as a '___'",
+            "caption": "What is the position you are interested in?",
+            "modelingAnswer": "I am interested in working as a lawyer.",
+            "video": "profanity_warning_c",
+            "statusText": "Please use professional language.",
+            "feedbackText": "Warning! Please use professional language.",
+            "maxAttempts": 2
+          },
+          "spanish_detected": {
+            "hint": "interested in working as a '___'",
+            "caption": "What is the position you are interested in?",
+            "modelingAnswer": "I am interested in working as a lawyer.",
+            "video": "english_warning",
+            "statusText": "Please answer in English.",
+            "feedbackText": "Please try again in English.",
+            "maxAttempts": 2
+          },
+          "off_topic_1": {
+            "hint": "interested in working as a '___'",
+            "caption": "What is the position you are interested in?",
+            "modelingAnswer": "I am interested in working as a lawyer.",
+            "video": "off_topic_1",
+            "statusText": "Let's focus on the interview question.",
+            "feedbackText": "Let's return to the interview question.",
+            "maxAttempts": 3
+          },
+          "off_topic_2": {
+            "hint": "interested in working as a '___'",
+            "caption": "What is the position you are interested in?",
+            "modelingAnswer": "I am interested in working as a lawyer.",
+            "video": "off_topic_2",
+            "statusText": "Let's focus on the interview question.",
+            "feedbackText": "Let's continue with the interview.",
+            "maxAttempts": 2
+          },
+          "off_topic_3": {
+            "hint": "interested in working as a '___'",
+            "caption": "What is the position you are interested in?",
+            "modelingAnswer": "I am interested in working as a lawyer.",
+            "video": "off_topic_1",
+            "statusText": "Let's focus on the interview question.",
+            "feedbackText": "Please keep the interview professional.",
+            "maxAttempts": 1
+          }
         },
-        "feedbackText": {
-          "good_answer": "That's right. Excellent answer! Let's continue.",
-          "excellent_answer": "That's right. Excellent answer! Let's continue.",
-          "partial_answer": "Good effort. Try reading the model answer and say it again.",
-          "too_short": "Please repeat. Can you elaborate a little more?",
-          "empty_answer": "Please write or say your answer."
+        "responseStates": {
+          "empty_answer": {
+            "video": "idle",
+            "statusText": "Please write or say your answer.",
+            "feedbackText": null,
+            "apiRequired": false,
+            "apiRole": "none",
+            "minWords": 0,
+            "maxAttempts": 7,
+            "advancesInterview": false
+          },
+          "too_short": {
+            "video": "try_again_feedback",
+            "statusText": "Try using a complete sentence.",
+            "feedbackText": "ai_generated",
+            "apiRequired": false,
+            "apiRole": "none",
+            "scoreRange": "6_7",
+            "minWords": 1,
+            "maxAttempts": 2,
+            "advancesInterview": false
+          },
+          "minimal_answer": {
+            "video": "try_again_feedback",
+            "statusText": "Try answering with a complete sentence.",
+            "feedbackText": "ai_generated",
+            "apiRequired": false,
+            "apiRole": "scaffold",
+            "scoreRange": "6_7",
+            "minWords": 3,
+            "maxAttempts": 2,
+            "advancesInterview": false
+          },
+          "communicative_attempt": {
+            "video": "excellent_thumbs_feedback",
+            "statusText": "Good effort.",
+            "feedbackText": "ai_generated",
+            "apiRequired": true,
+            "apiRole": "scaffold",
+            "scoreRange": "7_8",
+            "minWords": 4,
+            "maxAttempts": 2,
+            "advancesInterview": false
+          },
+          "communicative_answer": {
+            "video": "excellent_thumbs_feedback",
+            "statusText": "Good effort.",
+            "feedbackText": "ai_generated",
+            "apiRequired": true,
+            "apiRole": "improve",
+            "scoreRange": "7_8",
+            "minWords": 5,
+            "maxAttempts": 2,
+            "advancesInterview": false
+          },
+          "competent_answer": {
+            "video": "excellent_thumbs_feedback",
+            "statusText": "\u270f\ufe0f Good answer \u2014 here is one way to improve it.",
+            "feedbackText": "ai_generated",
+            "apiRequired": true,
+            "apiRole": "enrich",
+            "scoreRange": "8_9",
+            "minWords": 7,
+            "maxAttempts": 2,
+            "advancesInterview": true
+          },
+          "advanced_answer": {
+            "video": "excellent_thumbs_feedback",
+            "statusText": "\u270f\ufe0f Excellent answer \u2014 here is a stronger version to learn from.",
+            "feedbackText": "ai_generated",
+            "apiRequired": true,
+            "apiRole": "elevate",
+            "scoreRange": "10",
+            "minWords": 9,
+            "maxAttempts": 2,
+            "advancesInterview": true
+          },
+          "advanced_answer_plus": {
+            "video": "excellent_thumbs_feedback",
+            "statusText": "\u270f\ufe0f Outstanding answer \u2014 here is an advanced version to take notes from.",
+            "feedbackText": "ai_generated",
+            "apiRequired": true,
+            "apiRole": "elevate",
+            "scoreRange": "10",
+            "minWords": 12,
+            "maxAttempts": 1,
+            "advancesInterview": true
+          }
         },
         "next": "question_2"
       },
+
       {
         "id": "question_2",
         "progressStep": 2,
         "upperStatusText": "Academic background",
         "question": "What is your major?",
-        "hint": "Mention your major or bachelor’s degree and how long you have studied it.",
+        "hint": "Mention your major or bachelor's degree.",
         "caption": "Let's start by talking about your academic background. What is your major?",
-        "modelingAnswer": "I have majored in law for three years.",
-        "placeholder": "Example: I have majored in law for three years.",
+        "modelingAnswer": "I am majoring in Law.",
+        "placeholder": "Example: I am majoring in Law.",
         "video": "q2_video",
         "audio": "Let's start by talking about your academic background. What is your major?",
         "evaluationCriteria": {
@@ -268,51 +385,174 @@
             "career_interest_or_reason_for_studying"
           ],
           "acceptablePatterns": [
-  "i have majored in",
-  "i am majoring in",
-  "i am studying",
-  "my major is",
-  "i study",
-  "i am a student of",
-  "i have a bachelor's degree in",
-  "i have a bachelor degree in",
-  "my bachelor's degree is in",
-  "my bachelor degree is in",
-  "i have a degree in",
-  "i am in the",
-  "i am enrolled in"
-],
-         "semanticCategories": [
-  "academic_field",
-  "university_major",
-  "degree_program"
-]
+            "i have majored in",
+            "i am majoring in",
+            "i am studying",
+            "my major is",
+            "i study",
+            "i am a student of",
+            "i have a bachelor's degree in",
+            "i have a bachelor degree in",
+            "my bachelor's degree is in",
+            "my bachelor degree is in",
+            "i have a degree in",
+            "i am in the",
+            "i am enrolled in"
+          ],
+          "semanticCategories": [
+            "academic_field",
+            "university_major",
+            "degree_program"
+          ]
         },
-        "feedbackMap": {
-          "good_answer": "awesome_feedback",
-          "excellent_answer": "awesome_feedback",
-          "partial_answer": "try_reading_feedback",
-          "too_short": "try_again_feedback",
-          "empty_answer": "try_again_feedback"
+        "contextualHints": {
+          "profanity": {
+            "hint": "Mention your major respectfully.",
+            "caption": "Let's start by talking about your academic background. What is your major?",
+            "modelingAnswer": "I am majoring in Law.",
+            "video": "profanity_warning_c",
+            "statusText": "Please use professional language.",
+            "feedbackText": "Warning! Please use professional language.",
+            "maxAttempts": 2
+          },
+          "spanish_detected": {
+            "hint": "Mention your major in English.",
+            "caption": "Let's start by talking about your academic background. What is your major?",
+            "modelingAnswer": "I am majoring in Law.",
+            "video": "english_warning",
+            "statusText": "Please try again in English.",
+            "feedbackText": "Please try again in English.",
+            "maxAttempts": 2
+          },
+          "off_topic_1": {
+            "hint": "Mention what you study at university.",
+            "caption": "Let's start by talking about your academic background. What is your major?",
+            "modelingAnswer": "I am majoring in Business Administration.",
+            "video": "off_topic_1",
+            "statusText": "Let's focus on the interview question.",
+            "feedbackText": "Let's return to the interview question.",
+            "maxAttempts": 3
+          },
+          "off_topic_2": {
+            "hint": "Answer with your major or bachelor's degree.",
+            "caption": "Let's start by talking about your academic background. What is your major?",
+            "modelingAnswer": "I am majoring in Accounting.",
+            "video": "off_topic_2",
+            "statusText": "Let's focus on the interview question.",
+            "feedbackText": "Let's continue with the interview.",
+            "maxAttempts": 2
+          },
+          "off_topic_3": {
+            "hint": "Answer the academic background question.",
+            "caption": "Let's start by talking about your academic background. What is your major?",
+            "modelingAnswer": "I am majoring in Tourism.",
+            "video": "off_topic_1",
+            "statusText": "Let's focus on the interview question.",
+            "feedbackText": "Please keep the interview professional.",
+            "maxAttempts": 1
+          }
         },
-        "feedbackText": {
-          "good_answer": "It is awesome! Let's continue.",
-          "excellent_answer": "It is awesome! Let's continue.",
-          "partial_answer": "Good effort. Try reading the model answer and say it again.",
-          "too_short": "Please repeat. Can you elaborate a little more?",
-          "empty_answer": "Please write or say your answer."
+        "responseStates": {
+          "empty_answer": {
+            "video": "idle",
+            "statusText": "Please write or say your answer.",
+            "feedbackText": null,
+            "apiRequired": false,
+            "apiRole": "none",
+            "minWords": 0,
+            "maxAttempts": 7,
+            "advancesInterview": false
+          },
+          "too_short": {
+            "video": "try_again_feedback",
+            "statusText": "Use the menu: Hint, Caption, and Modeling Answer.",
+            "feedbackText": "ai_generated",
+            "apiRequired": false,
+            "apiRole": "none",
+            "scoreRange": "6_7",
+            "minWords": 1,
+            "maxAttempts": 2,
+            "advancesInterview": false
+          },
+          "minimal_answer": {
+            "video": "try_again_feedback",
+            "statusText": "Use the model answer from the menu and try again.",
+            "feedbackText": "ai_generated",
+            "apiRequired": false,
+            "apiRole": "scaffold",
+            "scoreRange": "6_7",
+            "minWords": 3,
+            "maxAttempts": 2,
+            "advancesInterview": false
+          },
+          "communicative_attempt": {
+            "video": "awesome_feedback",
+            "statusText": "Good effort.",
+            "feedbackText": "ai_generated",
+            "apiRequired": true,
+            "apiRole": "scaffold",
+            "scoreRange": "7_8",
+            "minWords": 4,
+            "maxAttempts": 2,
+            "advancesInterview": false
+          },
+          "communicative_answer": {
+            "video": "awesome_feedback",
+            "statusText": "Good effort.",
+            "feedbackText": "ai_generated",
+            "apiRequired": true,
+            "apiRole": "improve",
+            "scoreRange": "7_8",
+            "minWords": 5,
+            "maxAttempts": 2,
+            "advancesInterview": false
+          },
+          "competent_answer": {
+            "video": "awesome_feedback",
+            "statusText": "\u270f\ufe0f Good answer \u2014 here is one way to improve it.",
+            "feedbackText": "ai_generated",
+            "apiRequired": true,
+            "apiRole": "enrich",
+            "scoreRange": "8_9",
+            "minWords": 7,
+            "maxAttempts": 2,
+            "advancesInterview": true
+          },
+          "advanced_answer": {
+            "video": "awesome_feedback",
+            "statusText": "\u270f\ufe0f Excellent answer \u2014 here is a stronger version to learn from.",
+            "feedbackText": "ai_generated",
+            "apiRequired": true,
+            "apiRole": "elevate",
+            "scoreRange": "10",
+            "minWords": 9,
+            "maxAttempts": 2,
+            "advancesInterview": true
+          },
+          "advanced_answer_plus": {
+            "video": "awesome_feedback",
+            "statusText": "\u270f\ufe0f Outstanding answer \u2014 here is an advanced version to take notes from.",
+            "feedbackText": "ai_generated",
+            "apiRequired": true,
+            "apiRole": "elevate",
+            "scoreRange": "10",
+            "minWords": 12,
+            "maxAttempts": 1,
+            "advancesInterview": true
+          }
         },
         "next": "question_3"
       },
+
       {
         "id": "question_3",
         "progressStep": 3,
         "upperStatusText": "Previous responsibilities",
         "question": "Tell me about some responsibilities you have had at school, work or during internships.",
-        "hint": "Use present perfect to describe responsibilities, projects, or experience.",
+        "hint": "Mention one responsibility you have had at school, work, or internships.",
         "caption": "Tell me about some responsibilities you have had at school, work or during internships.",
-        "modelingAnswer": "I have been in charge of organizing small school events and coordinating teamwork activities.",
-        "placeholder": "Example: I have been in charge of organizing small school events and coordinating teamwork activities.",
+        "modelingAnswer": "I have been responsible for organizing school activities.",
+        "placeholder": "Example: I have been responsible for organizing school activities.",
         "video": "q3_video",
         "audio": "Tell me about some responsibilities you have had at school, work or during internships.",
         "evaluationCriteria": {
@@ -338,31 +578,154 @@
             "sports_or_extracurricular_context"
           ]
         },
-        "feedbackMap": {
-          "good_answer": "doing_great_feedback",
-          "excellent_answer": "doing_great_feedback",
-          "partial_answer": "try_reading_feedback",
-          "too_short": "try_again_feedback",
-          "empty_answer": "try_again_feedback"
+        "contextualHints": {
+          "profanity": {
+            "hint": "Answer respectfully and describe one responsibility.",
+            "caption": "Tell me about some responsibilities you have had at school, work or during internships.",
+            "modelingAnswer": "I have helped organize projects at school.",
+            "video": "profanity_warning_c",
+            "statusText": "Please use professional language.",
+            "feedbackText": "Warning! Please use professional language.",
+            "maxAttempts": 2
+          },
+          "spanish_detected": {
+            "hint": "Use English to describe one responsibility.",
+            "caption": "Tell me about some responsibilities you have had at school, work or during internships.",
+            "modelingAnswer": "I have been responsible for organizing events.",
+            "video": "english_warning",
+            "statusText": "Please answer in English.",
+            "feedbackText": "Please try again in English.",
+            "maxAttempts": 2
+          },
+          "off_topic_1": {
+            "hint": "Mention tasks you have done at school, work, or internships.",
+            "caption": "Tell me about some responsibilities you have had at school, work or during internships.",
+            "modelingAnswer": "I have helped prepare reports at school.",
+            "video": "off_topic_1",
+            "statusText": "Let's focus on the interview question.",
+            "feedbackText": "Let's return to the interview question.",
+            "maxAttempts": 3
+          },
+          "off_topic_2": {
+            "hint": "Describe one responsibility you have had.",
+            "caption": "Tell me about some responsibilities you have had at school, work or during internships.",
+            "modelingAnswer": "I have coordinated teamwork activities.",
+            "video": "off_topic_2",
+            "statusText": "Let's focus on the interview question.",
+            "feedbackText": "Let's continue with the interview.",
+            "maxAttempts": 2
+          },
+          "off_topic_3": {
+            "hint": "Answer with a real responsibility from school or work.",
+            "caption": "Tell me about some responsibilities you have had at school, work or during internships.",
+            "modelingAnswer": "I have been responsible for preparing presentations.",
+            "video": "off_topic_1",
+            "statusText": "Let's focus on the interview question.",
+            "feedbackText": "Please keep the interview professional.",
+            "maxAttempts": 1
+          }
         },
-        "feedbackText": {
-          "good_answer": "You're doing great! Let's continue.",
-          "excellent_answer": "You're doing great! Let's continue.",
-          "partial_answer": "Good effort. Try reading the model answer and say it again.",
-          "too_short": "Please repeat. Can you elaborate a little more?",
-          "empty_answer": "Please write or say your answer."
+        "responseStates": {
+          "empty_answer": {
+            "video": "idle",
+            "statusText": "Please write or say your answer.",
+            "feedbackText": null,
+            "apiRequired": false,
+            "apiRole": "none",
+            "minWords": 0,
+            "maxAttempts": 7,
+            "advancesInterview": false
+          },
+          "too_short": {
+            "video": "try_again_feedback",
+            "statusText": "Try using a complete sentence.",
+            "feedbackText": "ai_generated",
+            "apiRequired": false,
+            "apiRole": "none",
+            "scoreRange": "6_7",
+            "minWords": 1,
+            "maxAttempts": 2,
+            "advancesInterview": false
+          },
+          "minimal_answer": {
+            "video": "try_again_feedback",
+            "statusText": "Try answering with a complete sentence.",
+            "feedbackText": "ai_generated",
+            "apiRequired": false,
+            "apiRole": "scaffold",
+            "scoreRange": "6_7",
+            "minWords": 3,
+            "maxAttempts": 2,
+            "advancesInterview": false
+          },
+          "communicative_attempt": {
+            "video": "excellent_answer_feedback",
+            "statusText": "Good effort.",
+            "feedbackText": "ai_generated",
+            "apiRequired": true,
+            "apiRole": "scaffold",
+            "scoreRange": "7_8",
+            "minWords": 4,
+            "maxAttempts": 2,
+            "advancesInterview": false
+          },
+          "communicative_answer": {
+            "video": "excellent_answer_feedback",
+            "statusText": "Good effort.",
+            "feedbackText": "ai_generated",
+            "apiRequired": true,
+            "apiRole": "improve",
+            "scoreRange": "7_8",
+            "minWords": 5,
+            "maxAttempts": 2,
+            "advancesInterview": false
+          },
+          "competent_answer": {
+            "video": "excellent_answer_feedback",
+            "statusText": "\u270f\ufe0f Good answer \u2014 here is one way to improve it.",
+            "feedbackText": "ai_generated",
+            "apiRequired": true,
+            "apiRole": "enrich",
+            "scoreRange": "8_9",
+            "minWords": 7,
+            "maxAttempts": 2,
+            "advancesInterview": true
+          },
+          "advanced_answer": {
+            "video": "excellent_answer_feedback",
+            "statusText": "\u270f\ufe0f Excellent answer \u2014 here is a stronger version to learn from.",
+            "feedbackText": "ai_generated",
+            "apiRequired": true,
+            "apiRole": "elevate",
+            "scoreRange": "10",
+            "minWords": 9,
+            "maxAttempts": 2,
+            "advancesInterview": true
+          },
+          "advanced_answer_plus": {
+            "video": "excellent_answer_feedback",
+            "statusText": "\u270f\ufe0f Outstanding answer \u2014 here is an advanced version to take notes from.",
+            "feedbackText": "ai_generated",
+            "apiRequired": true,
+            "apiRole": "elevate",
+            "scoreRange": "10",
+            "minWords": 12,
+            "maxAttempts": 1,
+            "advancesInterview": true
+          }
         },
         "next": "question_4"
       },
+
       {
         "id": "question_4",
         "progressStep": 4,
         "upperStatusText": "Activities outside work",
         "question": "What activities are you interested in doing outside of school or work?",
-        "hint": "Use “interested in + verb-ing” to talk about hobbies or personal interests.",
+        "hint": "Mention activities or hobbies you enjoy outside of school or work.",
         "caption": "What activities are you interested in doing outside of school or work?",
-        "modelingAnswer": "I am interested in learning French and swimming in my free time.",
-        "placeholder": "Example: I am interested in learning French and swimming in my free time.",
+        "modelingAnswer": "I am interested in playing soccer and listening to music.",
+        "placeholder": "Example: I am interested in playing soccer and listening to music.",
         "video": "q4_video",
         "audio": "What activities are you interested in doing outside of school or work?",
         "evaluationCriteria": {
@@ -379,36 +742,159 @@
             "i usually"
           ],
           "semanticCategories": [
-  "personal_activity",
-  "hobby_or_interest",
-  "sports_or_extracurricular_context"
-]
+            "personal_activity",
+            "hobby_or_interest",
+            "sports_or_extracurricular_context"
+          ]
         },
-        "feedbackMap": {
-          "good_answer": "excellent_thumbs_feedback",
-          "excellent_answer": "excellent_thumbs_feedback",
-          "partial_answer": "try_again_feedback",
-          "too_short": "try_again_feedback",
-          "empty_answer": "try_again_feedback"
+        "contextualHints": {
+          "profanity": {
+            "hint": "Answer respectfully and mention activities you enjoy.",
+            "caption": "What activities are you interested in doing outside of school or work?",
+            "modelingAnswer": "I am interested in reading books and exercising.",
+            "video": "profanity_warning_c",
+            "statusText": "Please use professional language.",
+            "feedbackText": "Warning! Please use professional language.",
+            "maxAttempts": 2
+          },
+          "spanish_detected": {
+            "hint": "Use English to describe your hobbies or interests.",
+            "caption": "What activities are you interested in doing outside of school or work?",
+            "modelingAnswer": "I am interested in playing soccer.",
+            "video": "english_warning",
+            "statusText": "Please answer in English.",
+            "feedbackText": "Please try again in English.",
+            "maxAttempts": 2
+          },
+          "off_topic_1": {
+            "hint": "Mention activities you enjoy doing.",
+            "caption": "What activities are you interested in doing outside of school or work?",
+            "modelingAnswer": "I am interested in exercising and reading books.",
+            "video": "off_topic_1",
+            "statusText": "Let's focus on the interview question.",
+            "feedbackText": "Let's return to the interview question.",
+            "maxAttempts": 3
+          },
+          "off_topic_2": {
+            "hint": "Describe hobbies or activities you enjoy outside school or work.",
+            "caption": "What activities are you interested in doing outside of school or work?",
+            "modelingAnswer": "I am interested in cooking and watching movies.",
+            "video": "off_topic_2",
+            "statusText": "Let's focus on the interview question.",
+            "feedbackText": "Let's continue with the interview.",
+            "maxAttempts": 2
+          },
+          "off_topic_3": {
+            "hint": "Answer with hobbies or activities you enjoy.",
+            "caption": "What activities are you interested in doing outside of school or work?",
+            "modelingAnswer": "I am interested in photography and traveling.",
+            "video": "off_topic_1",
+            "statusText": "Let's focus on the interview question.",
+            "feedbackText": "Please keep the interview professional.",
+            "maxAttempts": 1
+          }
         },
-        "feedbackText": {
-          "good_answer": "Excellent answer. Let's continue.",
-          "excellent_answer": "Excellent answer. Let's continue.",
-          "partial_answer": "Try this instead. Make your answer clearer and more complete.",
-          "too_short": "Please repeat. Can you elaborate a little more?",
-          "empty_answer": "Please write or say your answer."
+        "responseStates": {
+          "empty_answer": {
+            "video": "idle",
+            "statusText": "Please write or say your answer.",
+            "feedbackText": null,
+            "apiRequired": false,
+            "apiRole": "none",
+            "minWords": 0,
+            "maxAttempts": 7,
+            "advancesInterview": false
+          },
+          "too_short": {
+            "video": "try_again_feedback",
+            "statusText": "Try using a complete sentence.",
+            "feedbackText": "ai_generated",
+            "apiRequired": false,
+            "apiRole": "none",
+            "scoreRange": "6_7",
+            "minWords": 1,
+            "maxAttempts": 2,
+            "advancesInterview": false
+          },
+          "minimal_answer": {
+            "video": "try_again_feedback",
+            "statusText": "Try answering with a complete sentence.",
+            "feedbackText": "ai_generated",
+            "apiRequired": false,
+            "apiRole": "scaffold",
+            "scoreRange": "6_7",
+            "minWords": 3,
+            "maxAttempts": 2,
+            "advancesInterview": false
+          },
+          "communicative_attempt": {
+            "video": "cute_feedback",
+            "statusText": "Good effort.",
+            "feedbackText": "ai_generated",
+            "apiRequired": true,
+            "apiRole": "scaffold",
+            "scoreRange": "7_8",
+            "minWords": 4,
+            "maxAttempts": 2,
+            "advancesInterview": false
+          },
+          "communicative_answer": {
+            "video": "cute_feedback",
+            "statusText": "Good effort.",
+            "feedbackText": "ai_generated",
+            "apiRequired": true,
+            "apiRole": "improve",
+            "scoreRange": "7_8",
+            "minWords": 5,
+            "maxAttempts": 2,
+            "advancesInterview": false
+          },
+          "competent_answer": {
+            "video": "cute_feedback",
+            "statusText": "\u270f\ufe0f Good answer \u2014 here is one way to improve it.",
+            "feedbackText": "ai_generated",
+            "apiRequired": true,
+            "apiRole": "enrich",
+            "scoreRange": "8_9",
+            "minWords": 7,
+            "maxAttempts": 2,
+            "advancesInterview": true
+          },
+          "advanced_answer": {
+            "video": "cute_feedback",
+            "statusText": "\u270f\ufe0f Excellent answer \u2014 here is a stronger version to learn from.",
+            "feedbackText": "ai_generated",
+            "apiRequired": true,
+            "apiRole": "elevate",
+            "scoreRange": "10",
+            "minWords": 9,
+            "maxAttempts": 2,
+            "advancesInterview": true
+          },
+          "advanced_answer_plus": {
+            "video": "cute_feedback",
+            "statusText": "\u270f\ufe0f Outstanding answer \u2014 here is an advanced version to take notes from.",
+            "feedbackText": "ai_generated",
+            "apiRequired": true,
+            "apiRole": "elevate",
+            "scoreRange": "10",
+            "minWords": 12,
+            "maxAttempts": 1,
+            "advancesInterview": true
+          }
         },
         "next": "question_5"
       },
+
       {
         "id": "question_5",
         "progressStep": 5,
         "upperStatusText": "Your strengths",
         "question": "What are you good at and what skills do you feel confident about using in a professional environment?",
-        "hint": "Use “good at + noun / verb-ing” to describe your skills and strengths.",
+        "hint": "Mention skills or abilities you feel confident about.",
         "caption": "What are you good at and what skills do you feel confident about using in a professional environment?",
-        "modelingAnswer": "I am good at programming apps and solving technical problems.",
-        "placeholder": "Example: I am good at programming apps and solving technical problems.",
+        "modelingAnswer": "I am good at teamwork and communication.",
+        "placeholder": "Example: I am good at teamwork and communication.",
         "video": "q5_video",
         "audio": "What are you good at and what skills do you feel confident about using in a professional environment?",
         "evaluationCriteria": {
@@ -430,31 +916,154 @@
             "craft_or_hobby_skill"
           ]
         },
-        "feedbackMap": {
-          "good_answer": "cute_feedback",
-          "excellent_answer": "cute_feedback",
-          "partial_answer": "try_again_feedback",
-          "too_short": "try_again_feedback",
-          "empty_answer": "try_again_feedback"
+        "contextualHints": {
+          "profanity": {
+            "hint": "Answer respectfully and describe your skills.",
+            "caption": "What are you good at and what skills do you feel confident about using in a professional environment?",
+            "modelingAnswer": "I am good at communication and teamwork.",
+            "video": "profanity_warning_c",
+            "statusText": "Please use professional language.",
+            "feedbackText": "Warning! Please use professional language.",
+            "maxAttempts": 2
+          },
+          "spanish_detected": {
+            "hint": "Use English to describe your strengths and skills.",
+            "caption": "What are you good at and what skills do you feel confident about using in a professional environment?",
+            "modelingAnswer": "I am good at math and problem-solving.",
+            "video": "english_warning",
+            "statusText": "Please answer in English.",
+            "feedbackText": "Please try again in English.",
+            "maxAttempts": 2
+          },
+          "off_topic_1": {
+            "hint": "Mention abilities or strengths related to school, work, or communication.",
+            "caption": "What are you good at and what skills do you feel confident about using in a professional environment?",
+            "modelingAnswer": "I am good at teamwork and organization.",
+            "video": "off_topic_1",
+            "statusText": "Let's focus on the interview question.",
+            "feedbackText": "Let's return to the interview question.",
+            "maxAttempts": 3
+          },
+          "off_topic_2": {
+            "hint": "Describe skills you feel confident using professionally.",
+            "caption": "What are you good at and what skills do you feel confident about using in a professional environment?",
+            "modelingAnswer": "I feel confident about communication and leadership skills.",
+            "video": "off_topic_2",
+            "statusText": "Let's focus on the interview question.",
+            "feedbackText": "Let's continue with the interview.",
+            "maxAttempts": 2
+          },
+          "off_topic_3": {
+            "hint": "Answer with your professional skills or strengths.",
+            "caption": "What are you good at and what skills do you feel confident about using in a professional environment?",
+            "modelingAnswer": "I am good at solving problems and working in teams.",
+            "video": "off_topic_1",
+            "statusText": "Let's focus on the interview question.",
+            "feedbackText": "Please keep the interview professional.",
+            "maxAttempts": 1
+          }
         },
-        "feedbackText": {
-          "good_answer": "That's cute! Let's continue.",
-          "excellent_answer": "That's cute! Let's continue.",
-          "partial_answer": "Try this instead. Make your answer clearer and more complete.",
-          "too_short": "Please repeat. Can you elaborate a little more?",
-          "empty_answer": "Please write or say your answer."
+        "responseStates": {
+          "empty_answer": {
+            "video": "idle",
+            "statusText": "Please write or say your answer.",
+            "feedbackText": null,
+            "apiRequired": false,
+            "apiRole": "none",
+            "minWords": 0,
+            "maxAttempts": 7,
+            "advancesInterview": false
+          },
+          "too_short": {
+            "video": "try_again_feedback",
+            "statusText": "Try using a complete sentence.",
+            "feedbackText": "ai_generated",
+            "apiRequired": false,
+            "apiRole": "none",
+            "scoreRange": "6_7",
+            "minWords": 1,
+            "maxAttempts": 2,
+            "advancesInterview": false
+          },
+          "minimal_answer": {
+            "video": "try_again_feedback",
+            "statusText": "Try answering with a complete sentence.",
+            "feedbackText": "ai_generated",
+            "apiRequired": false,
+            "apiRole": "scaffold",
+            "scoreRange": "6_7",
+            "minWords": 3,
+            "maxAttempts": 2,
+            "advancesInterview": false
+          },
+          "communicative_attempt": {
+            "video": "doing_great_feedback",
+            "statusText": "Good effort.",
+            "feedbackText": "ai_generated",
+            "apiRequired": true,
+            "apiRole": "scaffold",
+            "scoreRange": "7_8",
+            "minWords": 4,
+            "maxAttempts": 2,
+            "advancesInterview": false
+          },
+          "communicative_answer": {
+            "video": "doing_great_feedback",
+            "statusText": "Good effort.",
+            "feedbackText": "ai_generated",
+            "apiRequired": true,
+            "apiRole": "improve",
+            "scoreRange": "7_8",
+            "minWords": 5,
+            "maxAttempts": 2,
+            "advancesInterview": false
+          },
+          "competent_answer": {
+            "video": "doing_great_feedback",
+            "statusText": "\u270f\ufe0f Good answer \u2014 here is one way to improve it.",
+            "feedbackText": "ai_generated",
+            "apiRequired": true,
+            "apiRole": "enrich",
+            "scoreRange": "8_9",
+            "minWords": 7,
+            "maxAttempts": 2,
+            "advancesInterview": true
+          },
+          "advanced_answer": {
+            "video": "doing_great_feedback",
+            "statusText": "\u270f\ufe0f Excellent answer \u2014 here is a stronger version to learn from.",
+            "feedbackText": "ai_generated",
+            "apiRequired": true,
+            "apiRole": "elevate",
+            "scoreRange": "10",
+            "minWords": 9,
+            "maxAttempts": 2,
+            "advancesInterview": true
+          },
+          "advanced_answer_plus": {
+            "video": "doing_great_feedback",
+            "statusText": "\u270f\ufe0f Outstanding answer \u2014 here is an advanced version to take notes from.",
+            "feedbackText": "ai_generated",
+            "apiRequired": true,
+            "apiRole": "elevate",
+            "scoreRange": "10",
+            "minWords": 12,
+            "maxAttempts": 1,
+            "advancesInterview": true
+          }
         },
         "next": "question_6"
       },
+
       {
         "id": "question_6",
         "progressStep": 6,
         "upperStatusText": "Working in teams",
         "question": "Have you ever worked on a project that required teamwork? Tell me what you have done.",
-        "hint": "Use present perfect to describe teamwork experience and achievements.",
+        "hint": "Mention a project where you worked with other people.",
         "caption": "Have you ever worked on a project that required teamwork? Tell me what you have done.",
-        "modelingAnswer": "Yes, I have been a team leader and have coordinated group projects at school.",
-        "placeholder": "Example: Yes, I have been a team leader and have coordinated group projects at school.",
+        "modelingAnswer": "I worked on a school project with my classmates.",
+        "placeholder": "Example: I worked on a school project with my classmates.",
         "video": "q6_video",
         "audio": "Have you ever worked on a project that required teamwork? Tell me what you have done.",
         "evaluationCriteria": {
@@ -473,36 +1082,159 @@
             "my role was"
           ],
           "semanticCategories": [
-  "teamwork_experience",
-  "school_context",
-  "work_context"
-]
+            "teamwork_experience",
+            "school_context",
+            "work_context"
+          ]
         },
-        "feedbackMap": {
-          "good_answer": "excellent_answer_feedback",
-          "excellent_answer": "excellent_answer_feedback",
-          "partial_answer": "try_again_feedback",
-          "too_short": "try_again_feedback",
-          "empty_answer": "try_again_feedback"
+        "contextualHints": {
+          "profanity": {
+            "hint": "Answer respectfully and describe a teamwork experience.",
+            "caption": "Have you ever worked on a project that required teamwork? Tell me what you have done.",
+            "modelingAnswer": "I worked with my classmates on a presentation.",
+            "video": "profanity_warning_c",
+            "statusText": "Please use professional language.",
+            "feedbackText": "Warning! Please use professional language.",
+            "maxAttempts": 2
+          },
+          "spanish_detected": {
+            "hint": "Use English to describe a teamwork project.",
+            "caption": "Have you ever worked on a project that required teamwork? Tell me what you have done.",
+            "modelingAnswer": "I worked on a school project with my classmates.",
+            "video": "english_warning",
+            "statusText": "Please answer in English.",
+            "feedbackText": "Please try again in English.",
+            "maxAttempts": 2
+          },
+          "off_topic_1": {
+            "hint": "Mention a project where you worked with a team.",
+            "caption": "Have you ever worked on a project that required teamwork? Tell me what you have done.",
+            "modelingAnswer": "I worked with my classmates on a group presentation.",
+            "video": "off_topic_1",
+            "statusText": "Let's focus on the interview question.",
+            "feedbackText": "Let's return to the interview question.",
+            "maxAttempts": 3
+          },
+          "off_topic_2": {
+            "hint": "Describe a teamwork project and your role in it.",
+            "caption": "Have you ever worked on a project that required teamwork? Tell me what you have done.",
+            "modelingAnswer": "I helped organize tasks during a group project.",
+            "video": "off_topic_2",
+            "statusText": "Let's focus on the interview question.",
+            "feedbackText": "Let's continue with the interview.",
+            "maxAttempts": 2
+          },
+          "off_topic_3": {
+            "hint": "Answer with a real teamwork experience.",
+            "caption": "Have you ever worked on a project that required teamwork? Tell me what you have done.",
+            "modelingAnswer": "I worked with a team to prepare a presentation.",
+            "video": "off_topic_1",
+            "statusText": "Let's focus on the interview question.",
+            "feedbackText": "Please keep the interview professional.",
+            "maxAttempts": 1
+          }
         },
-        "feedbackText": {
-          "good_answer": "That's right. Excellent answer! Let's continue.",
-          "excellent_answer": "That's right. Excellent answer! Let's continue.",
-          "partial_answer": "Try this instead. Make your answer clearer and more complete.",
-          "too_short": "Please repeat. Can you elaborate a little more?",
-          "empty_answer": "Please write or say your answer."
+        "responseStates": {
+          "empty_answer": {
+            "video": "idle",
+            "statusText": "Please write or say your answer.",
+            "feedbackText": null,
+            "apiRequired": false,
+            "apiRole": "none",
+            "minWords": 0,
+            "maxAttempts": 7,
+            "advancesInterview": false
+          },
+          "too_short": {
+            "video": "try_again_feedback",
+            "statusText": "Try using a complete sentence.",
+            "feedbackText": "ai_generated",
+            "apiRequired": false,
+            "apiRole": "none",
+            "scoreRange": "6_7",
+            "minWords": 1,
+            "maxAttempts": 2,
+            "advancesInterview": false
+          },
+          "minimal_answer": {
+            "video": "try_again_feedback",
+            "statusText": "Try answering with a complete sentence.",
+            "feedbackText": "ai_generated",
+            "apiRequired": false,
+            "apiRole": "scaffold",
+            "scoreRange": "6_7",
+            "minWords": 3,
+            "maxAttempts": 2,
+            "advancesInterview": false
+          },
+          "communicative_attempt": {
+            "video": "excellent_answer_feedback",
+            "statusText": "Good effort.",
+            "feedbackText": "ai_generated",
+            "apiRequired": true,
+            "apiRole": "scaffold",
+            "scoreRange": "7_8",
+            "minWords": 4,
+            "maxAttempts": 2,
+            "advancesInterview": false
+          },
+          "communicative_answer": {
+            "video": "excellent_answer_feedback",
+            "statusText": "Good effort.",
+            "feedbackText": "ai_generated",
+            "apiRequired": true,
+            "apiRole": "improve",
+            "scoreRange": "7_8",
+            "minWords": 5,
+            "maxAttempts": 2,
+            "advancesInterview": false
+          },
+          "competent_answer": {
+            "video": "excellent_answer_feedback",
+            "statusText": "\u270f\ufe0f Good answer \u2014 here is one way to improve it.",
+            "feedbackText": "ai_generated",
+            "apiRequired": true,
+            "apiRole": "enrich",
+            "scoreRange": "8_9",
+            "minWords": 7,
+            "maxAttempts": 2,
+            "advancesInterview": true
+          },
+          "advanced_answer": {
+            "video": "excellent_answer_feedback",
+            "statusText": "\u270f\ufe0f Excellent answer \u2014 here is a stronger version to learn from.",
+            "feedbackText": "ai_generated",
+            "apiRequired": true,
+            "apiRole": "elevate",
+            "scoreRange": "10",
+            "minWords": 9,
+            "maxAttempts": 2,
+            "advancesInterview": true
+          },
+          "advanced_answer_plus": {
+            "video": "excellent_answer_feedback",
+            "statusText": "\u270f\ufe0f Outstanding answer \u2014 here is an advanced version to take notes from.",
+            "feedbackText": "ai_generated",
+            "apiRequired": true,
+            "apiRole": "elevate",
+            "scoreRange": "10",
+            "minWords": 12,
+            "maxAttempts": 1,
+            "advancesInterview": true
+          }
         },
         "next": "question_7"
       },
+
       {
         "id": "question_7",
         "progressStep": 7,
         "upperStatusText": "Independent work",
         "question": "What kind of tasks are you capable of doing independently?",
-        "hint": "Use “able to” to describe independent work skills and professional abilities.",
+        "hint": "Mention tasks you can complete independently.",
         "caption": "What kind of tasks are you capable of doing independently?",
-        "modelingAnswer": "I am able to work under pressure, manage my time effectively, and complete tasks independently.",
-        "placeholder": "Example: I am able to work under pressure, manage my time effectively, and complete tasks independently.",
+        "modelingAnswer": "I am capable of organizing documents independently.",
+        "placeholder": "Example: I am capable of organizing documents independently.",
         "video": "q7_video",
         "audio": "What kind of tasks are you capable of doing independently?",
         "evaluationCriteria": {
@@ -519,27 +1251,150 @@
             "i can work independently"
           ],
           "semanticCategories": [
-  "independent_task",
-  "task_management",
-  "professional_ability"
-]
+            "independent_task",
+            "task_management",
+            "professional_ability"
+          ]
         },
-        "feedbackMap": {
-          "good_answer": "doing_great_feedback",
-          "excellent_answer": "doing_great_feedback",
-          "partial_answer": "try_again_feedback",
-          "too_short": "try_again_feedback",
-          "empty_answer": "try_again_feedback"
+        "contextualHints": {
+          "profanity": {
+            "hint": "Answer respectfully and describe tasks you can do independently.",
+            "caption": "What kind of tasks are you capable of doing independently?",
+            "modelingAnswer": "I am capable of managing tasks independently.",
+            "video": "profanity_warning_c",
+            "statusText": "Please use professional language.",
+            "feedbackText": "Warning! Please use professional language.",
+            "maxAttempts": 2
+          },
+          "spanish_detected": {
+            "hint": "Use English to describe tasks you can complete independently.",
+            "caption": "What kind of tasks are you capable of doing independently?",
+            "modelingAnswer": "I am capable of working independently on projects.",
+            "video": "english_warning",
+            "statusText": "Please answer in English.",
+            "feedbackText": "Please try again in English.",
+            "maxAttempts": 2
+          },
+          "off_topic_1": {
+            "hint": "Mention tasks you can complete by yourself.",
+            "caption": "What kind of tasks are you capable of doing independently?",
+            "modelingAnswer": "I am capable of organizing information independently.",
+            "video": "off_topic_1",
+            "statusText": "Let's focus on the interview question.",
+            "feedbackText": "Let's return to the interview question.",
+            "maxAttempts": 3
+          },
+          "off_topic_2": {
+            "hint": "Describe tasks or responsibilities you can manage independently.",
+            "caption": "What kind of tasks are you capable of doing independently?",
+            "modelingAnswer": "I can complete administrative tasks independently.",
+            "video": "off_topic_2",
+            "statusText": "Let's focus on the interview question.",
+            "feedbackText": "Let's continue with the interview.",
+            "maxAttempts": 2
+          },
+          "off_topic_3": {
+            "hint": "Answer with tasks you can perform independently.",
+            "caption": "What kind of tasks are you capable of doing independently?",
+            "modelingAnswer": "I am capable of managing projects independently.",
+            "video": "off_topic_1",
+            "statusText": "Let's focus on the interview question.",
+            "feedbackText": "Please keep the interview professional.",
+            "maxAttempts": 1
+          }
         },
-        "feedbackText": {
-          "good_answer": "You're doing great! Let's continue.",
-          "excellent_answer": "You're doing great! Let's continue.",
-          "partial_answer": "Try this instead. Make your answer clearer and more complete.",
-          "too_short": "Please repeat. Can you elaborate a little more?",
-          "empty_answer": "Please write or say your answer."
+        "responseStates": {
+          "empty_answer": {
+            "video": "idle",
+            "statusText": "Please write or say your answer.",
+            "feedbackText": null,
+            "apiRequired": false,
+            "apiRole": "none",
+            "minWords": 0,
+            "maxAttempts": 7,
+            "advancesInterview": false
+          },
+          "too_short": {
+            "video": "try_again_feedback",
+            "statusText": "Try using a complete sentence.",
+            "feedbackText": "ai_generated",
+            "apiRequired": false,
+            "apiRole": "none",
+            "scoreRange": "6_7",
+            "minWords": 1,
+            "maxAttempts": 2,
+            "advancesInterview": false
+          },
+          "minimal_answer": {
+            "video": "try_again_feedback",
+            "statusText": "Try answering with a complete sentence.",
+            "feedbackText": "ai_generated",
+            "apiRequired": false,
+            "apiRole": "scaffold",
+            "scoreRange": "6_7",
+            "minWords": 3,
+            "maxAttempts": 2,
+            "advancesInterview": false
+          },
+          "communicative_attempt": {
+            "video": "awesome_feedback",
+            "statusText": "Good effort.",
+            "feedbackText": "ai_generated",
+            "apiRequired": true,
+            "apiRole": "scaffold",
+            "scoreRange": "7_8",
+            "minWords": 4,
+            "maxAttempts": 2,
+            "advancesInterview": false
+          },
+          "communicative_answer": {
+            "video": "awesome_feedback",
+            "statusText": "Good effort.",
+            "feedbackText": "ai_generated",
+            "apiRequired": true,
+            "apiRole": "improve",
+            "scoreRange": "7_8",
+            "minWords": 5,
+            "maxAttempts": 2,
+            "advancesInterview": false
+          },
+          "competent_answer": {
+            "video": "awesome_feedback",
+            "statusText": "\u270f\ufe0f Good answer \u2014 here is one way to improve it.",
+            "feedbackText": "ai_generated",
+            "apiRequired": true,
+            "apiRole": "enrich",
+            "scoreRange": "8_9",
+            "minWords": 7,
+            "maxAttempts": 2,
+            "advancesInterview": true
+          },
+          "advanced_answer": {
+            "video": "awesome_feedback",
+            "statusText": "\u270f\ufe0f Excellent answer \u2014 here is a stronger version to learn from.",
+            "feedbackText": "ai_generated",
+            "apiRequired": true,
+            "apiRole": "elevate",
+            "scoreRange": "10",
+            "minWords": 9,
+            "maxAttempts": 2,
+            "advancesInterview": true
+          },
+          "advanced_answer_plus": {
+            "video": "awesome_feedback",
+            "statusText": "\u270f\ufe0f Outstanding answer \u2014 here is an advanced version to take notes from.",
+            "feedbackText": "ai_generated",
+            "apiRequired": true,
+            "apiRole": "elevate",
+            "scoreRange": "10",
+            "minWords": 12,
+            "maxAttempts": 1,
+            "advancesInterview": true
+          }
         },
         "next": "finish"
       }
+
     ]
   },
   "behaviorRules": {
@@ -549,9 +1404,12 @@
       "off_topic",
       "empty_answer",
       "too_short",
-      "partial_answer",
-      "good_answer",
-      "excellent_answer"
+      "minimal_answer",
+      "communicative_attempt",
+      "communicative_answer",
+      "competent_answer",
+      "advanced_answer",
+      "advanced_answer_plus"
     ],
     "profanity": {
       "enabled": true,
@@ -564,7 +1422,7 @@
         "damn"
       ],
       "action": {
-        "video": "profanity_warning",
+        "video": "profanity_warning_c",
         "statusText": "Please use professional language.",
         "stayOnCurrentQuestion": true
       }
@@ -610,6 +1468,7 @@
       "terminationMessage": "Alright, I am stopping the interview here. This session is officially over."
     },
     "answerQuality": {
+      "_note": "Superseded by per-question responseStates. Retained for legacy reference only.",
       "empty_answer": {
         "video": "try_again_feedback",
         "statusText": "Please write or say your answer.",
@@ -620,19 +1479,34 @@
         "statusText": "Please answer with a complete sentence.",
         "stayOnCurrentQuestion": true
       },
-      "partial_answer": {
-        "video": "try_reading_feedback",
+      "minimal_answer": {
+        "video": "try_again_feedback",
         "statusText": "Try using the model answer.",
         "stayOnCurrentQuestion": true
       },
-      "good_answer": {
+      "communicative_attempt": {
+        "video": "try_again_feedback",
+        "statusText": "Good effort. Try to say more.",
+        "stayOnCurrentQuestion": true
+      },
+      "communicative_answer": {
+        "video": "try_again_feedback",
+        "statusText": "Good effort. Try to say more.",
+        "stayOnCurrentQuestion": true
+      },
+      "competent_answer": {
         "video": "doing_great_feedback",
         "statusText": "Good answer. Let's continue.",
         "advanceToNextQuestion": true
       },
-      "excellent_answer": {
+      "advanced_answer": {
         "video": "awesome_feedback",
         "statusText": "Excellent answer. Let's continue.",
+        "advanceToNextQuestion": true
+      },
+      "advanced_answer_plus": {
+        "video": "awesome_feedback",
+        "statusText": "Outstanding answer. Let's continue.",
         "advanceToNextQuestion": true
       }
     }
